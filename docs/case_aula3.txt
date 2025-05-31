@@ -1,0 +1,22 @@
+Aula3
+Business Case Dashboard de Vendas
+Contexto
+A empresa AgroFruits precisa de uma visão abrangente das receitas e volumes de produção da empresa, destacando a sazonalidade das culturas, o desempenho das fazendas, a representatividade dos países importadores e os tipos de transporte utilizados. O objetivo principal do dashboard é monitorar o desempenho financeiro e operacional, identificar tendências sazonais, e otimizar a logística de transporte.
+Objetivos de Análise:
+1. Sazonalidade: Utilizar os dados de sazonalidade para planejar estratégias de cultivo e venda que maximizem a receita nos períodos de maior demanda. 2. Otimização de Transporte: Analisar a representatividade por tipo de transporte e considerar a alocação de recursos para os meios mais eficientes e
+econômicos.
+3. Desempenho de Fazendas: Focar em estratégias de melhoria para fazendas com menor receita e analisar as melhores práticas das fazendas de maior desempenho.
+4. Expansão de Mercado: Avaliar os países importadores que geram maior receita e explorar oportunidades de expansão em mercados subexplorados.
+Indicadores Chave de Desempenho (KPIs)
+1. Receita Total: Monitorar o total de receita gerada.
+2. Volume de Produção: Monitorar o volume total de produção.
+3. Receita por Fazenda: Identificar a performance individual de cada fazenda.
+4. Receita por País Importador: Avaliar a contribuição de cada país importador.
+5. Volume por Mês (Sazonalidade de Cultivos): Analisar a sazonalidade e os volumes de produção por mês.
+6. Representatividade por Tipo de Transporte: Medir a distribuição da receita por diferentes tipos de transporte (Barco, Caminhão, Avião).
+
+tabelas usadas para o case:
+	pedidos.csv
+	produtos.csv
+
+chave de relacionamento: produto

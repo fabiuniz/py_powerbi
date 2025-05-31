@@ -1,0 +1,18 @@
+Aula1
+Business Case Dashboard Financeiro
+Contexto
+Uma empresa busca otimizar a gestão de seu fluxo de caixa e obter uma visão abrangente de suas receitas e despesas para um planejamento financeiro mais eficaz. Um dashboard financeiro no Power BI pode fornecer uma análise detalhada e precisa, ajudando na tomada de decisões estratégicas e no gerenciamento eficiente de recursos.
+Objetivos de Análise:
+1. Análise do Fluxo de Caixa: Monitorar e comparar receitas e despesas ao longo do tempo, identificando períodos de maior variação e possibilitando o planejamento de estratégias de contenção ou investimento.
+2. Resumos totais: Mostrar as receitas, despesas e saldos totalizados 3. Despesas por Classificação de custo: Entender a natureza das transações para identificar qual o tipo do maior custo e verificar a contribuição de cada categoria das despesas.
+4. Despesas por Setor: Analisar os setores que realizam mais despesas para identificar oportunidades de economias.
+Indicadores Chave de Desempenho (KPIs)
+• Receita Total: Medir o total de receitas geradas durante o período analisado para entender a lucratividade.
+• Despesas Totais: Quantificar as despesas totais para identificar áreas de redução de custos.
+• Saldo: Comparar receita e despesas para obter o saldo final disponível.
+
+tabelas usadas para o case:
+	setores.csv 
+	relatorio.csv
+
+chave de relacionamento: centro de custo	

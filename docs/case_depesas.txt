@@ -1,0 +1,32 @@
+"Analise os dados de despesas fornecidos no formato DATA;CATEGORIA;VALOR. Seu objetivo é extrair insights valiosos e apresentá-los de forma clara, utilizando tanto resumos textuais quanto visualizações gráficas específicas.
+
+Gasto Total por Categoria (Top 5):
+
+Calcule e apresente as 5 categorias com o maior gasto total.
+Visualização: Gere um gráfico de barras horizontais mostrando o valor total de cada uma dessas 5 categorias, com a categoria mais alta no topo.
+Frequência de Transações por Categoria (Top 5):
+
+Identifique as 5 categorias com o maior número de transações.
+Visualização: Crie um gráfico de barras verticais mostrando a contagem de transações para cada uma dessas 5 categorias.
+Gasto Mensal ao Longo do Tempo:
+
+Calcule o gasto total para cada mês no período dos dados.
+Visualização: Apresente um gráfico de linhas que mostre a evolução do gasto total por mês, permitindo identificar tendências de aumento ou diminuição.
+Distribuição de Gastos:
+
+Calcule a porcentagem de cada categoria no gasto total geral.
+Visualização: Utilize um gráfico de pizza (ou rosca) para as 5 a 7 categorias de maior impacto, agrupando as demais em 'Outros', para visualizar a proporção de cada gasto no orçamento geral.
+Análise de Picos de Gasto Diário:
+
+Identifique os dias com os maiores gastos diários totais.
+Visualização: Apresente um gráfico de dispersão (scatter plot) com a data no eixo X e o gasto diário total no eixo Y, destacando visualmente os picos.
+Insights e Anomalias:
+
+Forneça um resumo textual das principais observações extraídas dos gráficos, como categorias dominantes, tendências de gasto, e períodos de maior ou menor despesa.
+Destaque anomalias ou gastos incomuns (como um valor muito alto em uma categoria inesperada ou um pico de gasto em um dia específico), sugerindo possíveis causas e ações.
+Recomendações:
+
+Com base nas análises e visualizações, proponha recomendações práticas para otimização do orçamento e controle financeiro."
+
+tabelas usadas:
+	despesas.csv

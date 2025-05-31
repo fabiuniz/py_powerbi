@@ -1,0 +1,17 @@
+version: '3' # Versão da sintaxe do Docker Compose
+
+services:
+  dashboard: # Nome do seu serviço (você pode escolher outro)
+    build: . # Diz ao Docker Compose para construir a imagem a partir do Dockerfile no diretório atual
+    ports:
+      - "8050:8050" # Mapeia a porta 8050 do host para a porta 8050 do contêiner
+    volumes:
+      # Monta o diretório atual do host (/app) dentro do contêiner
+      # Isso permite que você faça alterações em app.py e requirements.txt
+      # sem precisar reconstruir a imagem Docker a cada vez.
+      # Para que as alterações no app.py sejam refletidas, o servidor Gunicorn
+      # precisaria ser reiniciado ou configurado para recarregar automaticamente (hot-reloading).
+      # Para desenvolvimento, 'docker compose restart dashboard' é uma opção simples.
+      - .:/app
+    command: gunicorn -b 0.0.0.0:8050 app:server # Comando para iniciar a aplicação Gunicorn
+    restart: unless-stopped # Reinicia o contêiner automaticamente a menos que ele seja parado manualmente

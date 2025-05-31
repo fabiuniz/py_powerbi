@@ -1,0 +1,5 @@
+# requirements.txt
+pandas
+dash
+plotly
+gunicorn # Necessário para rodar a aplicação em produção com Docker

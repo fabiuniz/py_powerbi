@@ -1,0 +1,211 @@
+Data;Conta Contábil;Tipo Movimentação;Classificação;Documento Fiscal;Centro de Custo;Status;Valor;Saldo
+16/01/2021;102842;Saídas;Despesas comerciais;1008549;100903;Pago;R$ 4.870,10;-R$ 4.870,10
+17/01/2021;102844;Entradas;Receita de vendas;1008550;100903;Pago;R$ 1.199,70;R$ 1.199,70
+26/01/2021;102844;Entradas;Outras entradas;1008552;100903;Pago;R$ 9.222,50;R$ 9.222,50
+28/01/2021;102844;Entradas;Receita de serviços;1008553;100903;Pago;R$ 12.537,95;R$ 12.537,95
+06/03/2021;102844;Entradas;Outras entradas;1008556;100903;Pago;R$ 14.244,50;R$ 14.244,50
+19/03/2021;102844;Entradas;Receita de vendas;1008559;100903;Pago;R$ 13.757,80;R$ 13.757,80
+14/04/2021;102844;Entradas;Receita de vendas;1008561;100903;Pago;R$ 10.208,30;R$ 10.208,30
+25/04/2021;102844;Entradas;Outras entradas;1008565;100903;Pago;R$ 14.407,25;R$ 14.407,25
+01/05/2021;102844;Entradas;Receita de vendas;1008566;100903;Pago;R$ 1.878,60;R$ 1.878,60
+03/07/2021;102844;Entradas;Receita de vendas;1008574;100903;Pago;R$ 8.841,20;R$ 8.841,20
+05/07/2021;102844;Entradas;Outras entradas;1008575;100903;Pago;R$ 1.057,10;R$ 1.057,10
+01/08/2021;102842;Saídas;Despesas comerciais;1008579;100903;Pago;R$ 3.521,60;-R$ 3.521,60
+30/08/2021;102842;Saídas;Despesas comerciais;1008586;100903;Pago;R$ 9.496,85;-R$ 9.496,85
+02/09/2021;102844;Entradas;Receita de serviços;1008587;100903;Pago;R$ 5.184,75;R$ 5.184,75
+09/09/2021;102844;Entradas;Receita de vendas;1008591;100903;Pago;R$ 12.257,40;R$ 12.257,40
+27/09/2021;102844;Entradas;Receita de vendas;1008596;100903;Pago;R$ 11.738,15;R$ 11.738,15
+27/09/2021;102844;Entradas;Outras entradas;1008597;100903;Pago;R$ 11.806,35;R$ 11.806,35
+14/11/2021;102844;Entradas;Receita de vendas;1008605;100903;Pago;R$ 90.534,00;R$ 90.534,00
+24/11/2021;102844;Entradas;Outras entradas;1008606;100903;Pago;R$ 12.317,85;R$ 12.317,85
+29/11/2021;102842;Saídas;Despesas comerciais;1008607;100903;Pago;R$ 10.828,30;-R$ 10.828,30
+25/12/2021;102844;Entradas;Receita de vendas;1008613;100903;Pago;R$ 13.839,95;R$ 13.839,95
+10/12/2021;102844;Entradas;Receita de vendas;1008613;100903;Pago;R$ 50.456,00;R$ 50.456,00
+02/01/2021;102844;Entradas;Receita de vendas;1008615;100903;Pago;R$ 10.262,55;R$ 10.262,55
+07/02/2021;102844;Entradas;Receita de serviços;1008619;100903;Pago;R$ 30.845,00;R$ 30.845,00
+07/03/2021;102844;Entradas;Receita de vendas;1008625;100903;Pago;R$ 45.432,00;R$ 45.432,00
+14/04/2021;102844;Entradas;Receita de vendas;1008632;100903;Pago;R$ 10.251,70;R$ 10.251,70
+04/05/2021;102844;Entradas;Receita de vendas;1008633;100903;Pago;R$ 45.788,00;R$ 45.788,00
+09/05/2021;102842;Saídas;Despesas comerciais;1008635;100903;Pago;R$ 15.188,45;-R$ 15.188,45
+10/05/2021;102844;Entradas;Receita de vendas;1008636;100903;Pago;R$ 64.566,00;R$ 64.566,00
+28/05/2021;102844;Entradas;Outras entradas;1008638;100903;Pago;R$ 12.135,00;R$ 12.135,00
+14/06/2021;102842;Saídas;Despesas comerciais;1008644;100903;Pago;R$ 1.430,65;-R$ 1.430,65
+27/09/2021;102844;Entradas;Outras entradas;1008597;100903;Pago;R$ 11.806,35;R$ 11.806,35
+10/06/2021;102844;Entradas;Receita de vendas;1008598;100903;Pago;R$ 74.450,59;R$ 74.450,59
+29/07/2021;102844;Entradas;Receita de vendas;1008599;100903;Pago;R$ 74.450,59;R$ 74.450,59
+05/08/2021;102844;Entradas;Receita de vendas;1008600;100903;Pago;R$ 80.427,00;R$ 80.427,00
+15/09/2021;102844;Entradas;Receita de vendas;1008601;100903;Pago;R$ 88.432,00;R$ 88.432,00
+20/10/2021;102844;Entradas;Receita de vendas;1008602;100903;Pago;R$ 71.585,00;R$ 71.585,00
+30/11/2021;102844;Entradas;Receita de vendas;1008603;100903;Pago;R$ 95.747,00;R$ 95.747,00
+16/01/2022;102842;Saídas;Despesas comerciais;1009549;100903;Pago;R$ 5.064,90;-R$ 5.064,90
+17/01/2022;102844;Entradas;Receita de vendas;1009550;100903;Pago;R$ 1.343,66;R$ 1.343,66
+26/01/2022;102844;Entradas;Outras entradas;1009552;100903;Pago;R$ 8.976,57;R$ 8.976,57
+28/01/2022;102844;Entradas;Receita de serviços;1009553;100903;Pago;R$ 13.708,16;R$ 13.708,16
+06/03/2022;102844;Entradas;Outras entradas;1009556;100903;Pago;R$ 14.339,46;R$ 14.339,46
+19/03/2022;102844;Entradas;Receita de vendas;1009559;100903;Pago;R$ 14.124,67;R$ 14.124,67
+14/04/2022;102844;Entradas;Receita de vendas;1009561;100903;Pago;R$ 10.888,85;R$ 10.888,85
+25/04/2022;102844;Entradas;Outras entradas;1009565;100903;Pago;R$ 16.040,07;R$ 16.040,07
+01/05/2022;102844;Entradas;Receita de vendas;1009566;100903;Pago;R$ 1.709,53;R$ 1.709,53
+03/07/2022;102844;Entradas;Receita de vendas;1009574;100903;Pago;R$ 8.708,58;R$ 8.708,58
+05/07/2022;102844;Entradas;Outras entradas;1009575;100903;Pago;R$ 1.071,19;R$ 1.071,19
+01/08/2022;102842;Saídas;Despesas comerciais;1009579;100903;Pago;R$ 3.169,44;-R$ 3.169,44
+30/08/2022;102842;Saídas;Despesas comerciais;1009586;100903;Pago;R$ 9.623,47;-R$ 9.623,47
+02/09/2022;102844;Entradas;Receita de serviços;1009587;100903;Pago;R$ 5.426,71;R$ 5.426,71
+09/09/2022;102844;Entradas;Receita de vendas;1009591;100903;Pago;R$ 13.891,72;R$ 13.891,72
+27/09/2022;102844;Entradas;Receita de vendas;1009596;100903;Pago;R$ 13.303,24;R$ 13.303,24
+27/09/2022;102844;Entradas;Outras entradas;1009597;100903;Pago;R$ 10.783,13;R$ 10.783,13
+14/11/2022;102844;Entradas;Receita de vendas;1009605;100903;Pago;R$ 82.687,72;R$ 82.687,72
+24/11/2022;102844;Entradas;Outras entradas;1009606;100903;Pago;R$ 13.385,40;R$ 13.385,40
+29/11/2022;102842;Saídas;Despesas comerciais;1009607;100903;Pago;R$ 11.694,56;-R$ 11.694,56
+25/12/2022;102844;Entradas;Receita de vendas;1009613;100903;Pago;R$ 15.408,48;R$ 15.408,48
+10/12/2022;102844;Entradas;Receita de vendas;1009613;100903;Pago;R$ 49.446,88;R$ 49.446,88
+02/01/2022;102844;Entradas;Receita de vendas;1009615;100903;Pago;R$ 11.425,64;R$ 11.425,64
+07/02/2022;102844;Entradas;Receita de serviços;1009619;100903;Pago;R$ 34.752,03;R$ 34.752,03
+07/03/2022;102844;Entradas;Receita de vendas;1009625;100903;Pago;R$ 39.980,16;R$ 39.980,16
+14/04/2022;102844;Entradas;Receita de vendas;1009632;100903;Pago;R$ 10.593,42;R$ 10.593,42
+04/05/2022;102844;Entradas;Receita de vendas;1009633;100903;Pago;R$ 44.872,24;R$ 44.872,24
+09/05/2022;102842;Saídas;Despesas comerciais;1009635;100903;Pago;R$ 15.390,96;-R$ 15.390,96
+10/05/2022;102844;Entradas;Receita de vendas;1009636;100903;Pago;R$ 71.453,04;R$ 71.453,04
+28/05/2022;102844;Entradas;Outras entradas;1009638;100903;Pago;R$ 13.024,90;R$ 13.024,90
+14/06/2022;102842;Saídas;Despesas comerciais;1009644;100903;Pago;R$ 1.373,42;-R$ 1.373,42
+27/09/2022;102844;Entradas;Outras entradas;1009597;100903;Pago;R$ 12.042,48;R$ 12.042,48
+10/06/2022;102844;Entradas;Receita de vendas;1009598;100903;Pago;R$ 82.391,99;R$ 82.391,99
+29/07/2022;102844;Entradas;Receita de vendas;1009599;100903;Pago;R$ 77.428,61;R$ 77.428,61
+05/08/2022;102844;Entradas;Receita de vendas;1009600;100903;Pago;R$ 91.150,60;R$ 91.150,60
+15/09/2022;102844;Entradas;Receita de vendas;1009601;100903;Pago;R$ 91.969,28;R$ 91.969,28
+20/10/2022;102844;Entradas;Receita de vendas;1009602;100903;Pago;R$ 68.721,60;R$ 68.721,60
+30/11/2022;102844;Entradas;Receita de vendas;1009603;100903;Pago;R$ 97.023,63;R$ 97.023,63
+07/03/2021;102842;Saídas;Despesas administrativas;1008557;100901;Pago;R$ 9.062,85;-R$ 9.062,85
+27/03/2021;102842;Saídas;Despesas administrativas;1008560;100901;Pago;R$ 531,65;-R$ 531,65
+09/05/2021;102842;Saídas;Impostos;1008567;100901;Pago;R$ 8.289,40;-R$ 8.289,40
+17/06/2021;102844;Saídas;Despesas com serviços;1008571;100901;Pago;R$ 12.440,30;-R$ 12.440,30
+01/07/2021;102844;Saídas;Despesas administrativas;1008573;100901;Pago;R$ 8.242,00;-R$ 8.242,00
+27/07/2021;102844;Saídas;Despesas com serviços;1008578;100901;Pago;R$ 14.464,60;-R$ 14.464,60
+02/08/2021;102842;Saídas;Impostos;1008581;100901;Pago;R$ 4.313,65;-R$ 4.313,65
+22/08/2021;102844;Saídas;Despesas com serviços;1008584;100901;Pago;R$ 13.867,85;-R$ 13.867,85
+06/09/2021;102844;Saídas;Despesas administrativas;1008589;100901;Pago;R$ 5.342,85;-R$ 5.342,85
+07/09/2021;102844;Saídas;Despesas com serviços;1008590;100901;Pago;R$ 5.175,45;-R$ 5.175,45
+11/09/2021;102842;Saídas;Despesas com serviços;1008592;100901;Pago;R$ 4.775,55;-R$ 4.775,55
+21/09/2021;102842;Saídas;Despesas com serviços;1008593;100901;Pago;R$ 12.775,10;-R$ 12.775,10
+08/10/2021;102842;Saídas;Despesas administrativas;1008600;100901;Pago;R$ 5.785,00;-R$ 5.785,00
+15/10/2021;102844;Saídas;Despesas com serviços;1008601;100901;Pago;R$ 1.520,55;-R$ 1.520,55
+19/01/2021;102842;Saídas;Despesas com serviços;1008617;100901;Pago;R$ 8.901,65;-R$ 8.901,65
+23/01/2021;102842;Saídas;Despesas administrativas;1008618;100901;Pago;R$ 7.895,00;-R$ 7.895,00
+13/02/2021;102842;Saídas;Impostos;1008620;100901;Pago;R$ 7.993,35;-R$ 7.993,35
+27/03/2021;102844;Saídas;Despesas administrativas;1008628;100901;Pago;R$ 5.454,00;-R$ 5.454,00
+14/05/2021;102844;Saídas;Despesas com serviços;1008637;100901;Pago;R$ 5.389,35;-R$ 5.389,35
+05/06/2021;102844;Saídas;Despesas com serviços;1008640;100901;Pago;R$ 1.494,20;-R$ 1.494,20
+06/06/2021;102844;Saídas;Despesas administrativas;1008641;100901;Pago;R$ 5.108,80;-R$ 5.108,80
+14/06/2021;102844;Saídas;Despesas com serviços;1008643;100901;Pago;R$ 11.229,75;-R$ 11.229,75
+07/03/2022;102842;Saídas;Despesas administrativas;1009557;100901;Pago;R$ 10.271,23;-R$ 10.271,23
+27/03/2022;102842;Saídas;Despesas administrativas;1009560;100901;Pago;R$ 560,00;-R$ 560,00
+09/05/2022;102842;Saídas;Impostos;1009567;100901;Pago;R$ 7.709,14;-R$ 7.709,14
+17/06/2022;102844;Saídas;Despesas com serviços;1009571;100901;Pago;R$ 13.352,59;-R$ 13.352,59
+01/07/2022;102844;Saídas;Despesas administrativas;1009573;100901;Pago;R$ 7.912,32;-R$ 7.912,32
+27/07/2022;102844;Saídas;Despesas com serviços;1009578;100901;Pago;R$ 15.814,63;-R$ 15.814,63
+02/08/2022;102842;Saídas;Impostos;1009581;100901;Pago;R$ 4.342,41;-R$ 4.342,41
+22/08/2022;102844;Saídas;Despesas com serviços;1009584;100901;Pago;R$ 14.607,47;-R$ 14.607,47
+06/09/2022;102844;Saídas;Despesas administrativas;1009589;100901;Pago;R$ 5.057,90;-R$ 5.057,90
+07/09/2022;102844;Saídas;Despesas com serviços;1009590;100901;Pago;R$ 5.554,98;-R$ 5.554,98
+11/09/2022;102842;Saídas;Despesas com serviços;1009592;100901;Pago;R$ 4.393,51;-R$ 4.393,51
+21/09/2022;102842;Saídas;Despesas com serviços;1009593;100901;Pago;R$ 14.478,45;-R$ 14.478,45
+08/10/2022;102842;Saídas;Despesas administrativas;1009600;100901;Pago;R$ 5.977,83;-R$ 5.977,83
+15/10/2022;102844;Saídas;Despesas com serviços;1009601;100901;Pago;R$ 1.561,10;-R$ 1.561,10
+19/01/2022;102842;Saídas;Despesas com serviços;1009617;100901;Pago;R$ 9.435,75;-R$ 9.435,75
+23/01/2022;102842;Saídas;Despesas administrativas;1009618;100901;Pago;R$ 8.684,50;-R$ 8.684,50
+13/02/2022;102842;Saídas;Impostos;1009620;100901;Pago;R$ 9.005,84;-R$ 9.005,84
+27/03/2022;102844;Saídas;Despesas administrativas;1009628;100901;Pago;R$ 6.181,20;-R$ 6.181,20
+14/05/2022;102844;Saídas;Despesas com serviços;1009637;100901;Pago;R$ 5.892,36;-R$ 5.892,36
+05/06/2022;102844;Saídas;Despesas com serviços;1009640;100901;Pago;R$ 1.643,62;-R$ 1.643,62
+06/06/2022;102844;Saídas;Despesas administrativas;1009641;100901;Pago;R$ 5.687,80;-R$ 5.687,80
+14/06/2022;102844;Saídas;Despesas com serviços;1009643;100901;Pago;R$ 11.678,94;-R$ 11.678,94
+08/02/2021;102842;Saídas;Gastos com pessoal;1008554;100902;Pago;R$ 14.932,70;-R$ 14.932,70
+14/03/2021;102842;Saídas;Gastos com pessoal;1008558;100902;Pago;R$ 16.227,00;-R$ 16.227,00
+15/04/2021;102842;Saídas;Gastos com pessoal;1008562;100902;Pago;R$ 14.084,85;-R$ 14.084,85
+02/08/2021;102842;Saídas;Gastos com pessoal;1008580;100902;Pago;R$ 15.345,00;-R$ 15.345,00
+11/08/2021;102842;Saídas;Gastos com pessoal;1008582;100902;Pago;R$ 15.640,00;-R$ 15.640,00
+30/08/2021;102842;Saídas;Gastos com pessoal;1008585;100902;Pago;R$ 15.728,00;-R$ 15.728,00
+05/09/2021;102842;Saídas;Gastos com pessoal;1008588;100902;Pago;R$ 11.257,00;-R$ 11.257,00
+24/09/2021;102842;Saídas;Gastos com pessoal;1008594;100902;Pago;R$ 12.272,00;-R$ 12.272,00
+09/12/2021;102842;Saídas;Gastos com pessoal;1008610;100902;Pago;R$ 12.045,00;-R$ 12.045,00
+11/12/2021;102842;Saídas;Gastos com pessoal;1008611;100902;Pago;R$ 14.317,35;-R$ 14.317,35
+17/12/2021;102842;Saídas;Gastos com pessoal;1008612;100902;Pago;R$ 15.042,00;-R$ 15.042,00
+14/02/2021;102842;Saídas;Gastos com pessoal;1008621;100902;Pago;R$ 14.938,90;-R$ 14.938,90
+29/03/2021;102842;Saídas;Gastos com pessoal;1008629;100902;Pago;R$ 10.288,90;-R$ 10.288,90
+07/04/2021;102842;Saídas;Gastos com pessoal;1008630;100902;Pago;R$ 14.743,60;-R$ 14.743,60
+04/05/2021;102842;Saídas;Gastos com pessoal;1008634;100902;Pago;R$ 18.224,00;-R$ 18.224,00
+08/02/2022;102842;Saídas;Gastos com pessoal;1009554;100902;Pago;R$ 16.425,97;-R$ 16.425,97
+14/03/2022;102842;Saídas;Gastos com pessoal;1009558;100902;Pago;R$ 18.066,06;-R$ 18.066,06
+15/04/2022;102842;Saídas;Gastos com pessoal;1009562;100902;Pago;R$ 13.145,86;-R$ 13.145,86
+02/08/2022;102842;Saídas;Gastos com pessoal;1009580;100902;Pago;R$ 15.447,30;-R$ 15.447,30
+11/08/2022;102842;Saídas;Gastos com pessoal;1009582;100902;Pago;R$ 16.369,87;-R$ 16.369,87
+30/08/2022;102842;Saídas;Gastos com pessoal;1009585;100902;Pago;R$ 13.735,79;-R$ 13.735,79
+05/09/2022;102842;Saídas;Gastos com pessoal;1009588;100902;Pago;R$ 12.082,51;-R$ 12.082,51
+24/09/2022;102842;Saídas;Gastos com pessoal;1009594;100902;Pago;R$ 13.008,32;-R$ 13.008,32
+09/12/2022;102842;Saídas;Gastos com pessoal;1009610;100902;Pago;R$ 13.490,40;-R$ 13.490,40
+11/12/2022;102842;Saídas;Gastos com pessoal;1009611;100902;Pago;R$ 14.412,80;-R$ 14.412,80
+17/12/2022;102842;Saídas;Gastos com pessoal;1009612;100902;Pago;R$ 15.342,84;-R$ 15.342,84
+14/02/2022;102842;Saídas;Gastos com pessoal;1009621;100902;Pago;R$ 15.138,09;-R$ 15.138,09
+29/03/2022;102842;Saídas;Gastos com pessoal;1009629;100902;Pago;R$ 10.974,83;-R$ 10.974,83
+07/04/2022;102842;Saídas;Gastos com pessoal;1009630;100902;Pago;R$ 13.170,95;-R$ 13.170,95
+04/05/2022;102842;Saídas;Gastos com pessoal;1009634;100902;Pago;R$ 20.410,88;-R$ 20.410,88
+01/01/2021;102844;Saídas;Despesas administrativas;1008547;100904;Pago;R$ 1.725,15;-R$ 1.725,15
+10/01/2021;102844;Saídas;Despesas comerciais;1008548;100904;Pago;R$ 13.627,60;-R$ 13.627,60
+23/01/2021;102844;Saídas;Despesas administrativas;1008551;100904;Pago;R$ 2.686,15;-R$ 2.686,15
+17/04/2021;102842;Saídas;Despesas administrativas;1008563;100904;Pago;R$ 1.245,00;-R$ 1.245,00
+24/05/2021;102844;Saídas;Despesas comerciais;1008568;100904;Pago;R$ 1.393,45;-R$ 1.393,45
+08/06/2021;102842;Saídas;Despesas administrativas;1008569;100904;Pago;R$ 4.542,00;-R$ 4.542,00
+11/06/2021;102844;Saídas;Despesas comerciais;1008570;100904;Pago;R$ 1.069,50;-R$ 1.069,50
+22/06/2021;102844;Saídas;Despesas com serviços;1008572;100904;Pago;R$ 13.373,40;-R$ 13.373,40
+05/07/2021;102844;Saídas;Despesas comerciais;1008576;100904;Pago;R$ 8.873,75;-R$ 8.873,75
+16/07/2021;102842;Saídas;Despesas administrativas;1008577;100904;Pago;R$ 505,30;-R$ 505,30
+26/09/2021;102844;Saídas;Despesas administrativas;1008595;100904;Pago;R$ 1.900,30;-R$ 1.900,30
+01/10/2021;102842;Saídas;Despesas administrativas;1008598;100904;Pago;R$ 9.983,55;-R$ 9.983,55
+15/10/2021;102844;Saídas;Despesas comerciais;1008602;100904;Pago;R$ 11.507,20;-R$ 11.507,20
+01/11/2021;102844;Saídas;Despesas administrativas;1008604;100904;Pago;R$ 14.162,35;-R$ 14.162,35
+04/12/2021;102844;Saídas;Despesas administrativas;1008608;100904;Pago;R$ 1.577,00;-R$ 1.577,00
+30/12/2021;102844;Saídas;Despesas com serviços;1008614;100904;Pago;R$ 10.691,90;-R$ 10.691,90
+15/02/2021;102844;Saídas;Despesas comerciais;1008622;100904;Pago;R$ 12.276,00;-R$ 12.276,00
+10/03/2021;102844;Saídas;Despesas comerciais;1008626;100904;Pago;R$ 7.701,95;-R$ 7.701,95
+13/04/2021;102844;Saídas;Despesas administrativas;1008631;100904;Pago;R$ 1.224,00;-R$ 1.224,00
+28/05/2021;102844;Saídas;Despesas com serviços;1008639;100904;Pago;R$ 5.789,25;-R$ 5.789,25
+08/06/2021;102844;Saídas;Despesas administrativas;1008642;100904;Pago;R$ 7.446,20;-R$ 7.446,20
+18/06/2021;102844;Saídas;Despesas com serviços;1008645;100904;Pago;R$ 3.177,50;-R$ 3.177,50
+01/01/2022;102844;Saídas;Despesas administrativas;1009547;100904;Pago;R$ 1.840,16;-R$ 1.840,16
+10/01/2022;102844;Saídas;Despesas comerciais;1009548;100904;Pago;R$ 14.354,41;-R$ 14.354,41
+23/01/2022;102844;Saídas;Despesas administrativas;1009551;100904;Pago;R$ 2.990,58;-R$ 2.990,58
+17/04/2022;102842;Saídas;Despesas administrativas;1009563;100904;Pago;R$ 1.120,50;-R$ 1.120,50
+24/05/2022;102844;Saídas;Despesas comerciais;1009568;100904;Pago;R$ 1.542,08;-R$ 1.542,08
+08/06/2022;102842;Saídas;Despesas administrativas;1009569;100904;Pago;R$ 4.632,84;-R$ 4.632,84
+11/06/2022;102844;Saídas;Despesas comerciais;1009570;100904;Pago;R$ 1.042,76;-R$ 1.042,76
+22/06/2022;102844;Saídas;Despesas com serviços;1009572;100904;Pago;R$ 14.710,74;-R$ 14.710,74
+05/07/2022;102844;Saídas;Despesas comerciais;1009576;100904;Pago;R$ 7.868,06;-R$ 7.868,06
+16/07/2022;102842;Saídas;Despesas administrativas;1009577;100904;Pago;R$ 457,30;-R$ 457,30
+26/09/2022;102844;Saídas;Despesas administrativas;1009595;100904;Pago;R$ 2.064,99;-R$ 2.064,99
+01/10/2022;102842;Saídas;Despesas administrativas;1009598;100904;Pago;R$ 10.981,91;-R$ 10.981,91
+15/10/2022;102844;Saídas;Despesas comerciais;1009602;100904;Pago;R$ 13.041,49;-R$ 13.041,49
+01/11/2022;102844;Saídas;Despesas administrativas;1009604;100904;Pago;R$ 15.389,75;-R$ 15.389,75
+04/12/2022;102844;Saídas;Despesas administrativas;1009608;100904;Pago;R$ 1.745,21;-R$ 1.745,21
+30/12/2022;102844;Saídas;Despesas com serviços;1009614;100904;Pago;R$ 11.689,81;-R$ 11.689,81
+15/02/2022;102844;Saídas;Despesas comerciais;1009622;100904;Pago;R$ 12.112,32;-R$ 12.112,32
+10/03/2022;102844;Saídas;Despesas comerciais;1009626;100904;Pago;R$ 7.342,53;-R$ 7.342,53
+13/04/2022;102844;Saídas;Despesas administrativas;1009631;100904;Pago;R$ 1.370,88;-R$ 1.370,88
+28/05/2022;102844;Saídas;Despesas com serviços;1009639;100904;Pago;R$ 6.020,82;-R$ 6.020,82
+08/06/2022;102844;Saídas;Despesas administrativas;1009642;100904;Pago;R$ 7.942,61;-R$ 7.942,61
+18/06/2022;102844;Saídas;Despesas com serviços;1009645;100904;Pago;R$ 2.986,85;-R$ 2.986,85
+10/02/2021;102844;Saídas;Despesas com serviços;1008555;100905;Pago;R$ 13.102,15;-R$ 13.102,15
+23/04/2021;102844;Saídas;Despesas administrativas;1008564;100905;Pago;R$ 8.455,25;-R$ 8.455,25
+18/08/2021;102844;Saídas;Despesas com serviços;1008583;100905;Pago;R$ 15.365,15;-R$ 15.365,15
+05/10/2021;102844;Saídas;Despesas administrativas;1008599;100905;Pago;R$ 6.455,00;-R$ 6.455,00
+30/10/2021;102844;Saídas;Despesas com serviços;1008603;100905;Pago;R$ 6.889,75;-R$ 6.889,75
+05/01/2021;102844;Saídas;Despesas administrativas;1008616;100905;Pago;R$ 7.281,90;-R$ 7.281,90
+28/02/2021;102844;Saídas;Despesas com serviços;1008623;100905;Pago;R$ 10.513,65;-R$ 10.513,65
+18/03/2021;102842;Saídas;Despesas comerciais;1008627;100905;Pago;R$ 8.267,70;-R$ 8.267,70
+10/02/2022;102844;Saídas;Despesas com serviços;1009555;100905;Pago;R$ 14.849,10;-R$ 14.849,10
+23/04/2022;102844;Saídas;Despesas administrativas;1009564;100905;Pago;R$ 9.582,62;-R$ 9.582,62
+18/08/2022;102844;Saídas;Despesas com serviços;1009583;100905;Pago;R$ 16.901,67;-R$ 16.901,67
+05/10/2022;102844;Saídas;Despesas administrativas;1009599;100905;Pago;R$ 6.325,90;-R$ 6.325,90
+30/10/2022;102844;Saídas;Despesas com serviços;1009603;100905;Pago;R$ 7.073,48;-R$ 7.073,48
+05/01/2022;102844;Saídas;Despesas administrativas;1009616;100905;Pago;R$ 7.573,18;-R$ 7.573,18
+28/02/2022;102844;Saídas;Despesas com serviços;1009623;100905;Pago;R$ 11.845,38;-R$ 11.845,38
+18/03/2022;102842;Saídas;Despesas comerciais;1009627;100905;Pago;R$ 9.314,94;-R$ 9.314,94

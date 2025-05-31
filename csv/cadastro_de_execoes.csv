@@ -1,0 +1,7 @@
+Cód Exceção;Descrição Desvio;Responsável
+E01;Avaria (Carga Danificada);Operador Logístico
+E02;Extravio (Carga Perdida);Operador Logístico
+E03;Atraso no Embarque;Operador Log¡stico
+E04;Documentação;Fornecedor
+E05;Atraso Fornecedor;Fornecedor
+E06;Força Maior (clima, greve, feriado);Outro

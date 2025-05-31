@@ -1,0 +1,27 @@
+Aula2
+Business Case
+Dashboard de Logística - Comércio Exterior
+Contexto
+A área de comércio exterior de uma empresa automotiva busca melhorar o monitoramento dos embarques de importação, implementando uma torre de controle eficiente. A empresa enfrenta desafios críticos, como paralisações na linha de produção devido a atrasos nas entregas, e precisa de uma visão completa das operações logísticas para tomar decisões mais inteligentes, encontrar oportunidades de melhoria e garantir o cumprimento dos prazos, minimizando o impacto em toda a cadeia de suprimentos.
+Atualmente, o controle é descentralizado e baseado em planilhas enviadas pelos operadores logísticos, resultando em dados dispersos e pouco claros. A equipe se reúne toda semana para revisar indicadores específicos e como analista responsável, você deve criar um relatório no Power BI que, além de fornecer maior visibilidade, também suporte as discussões para a elaboração de planos de ação do time, identificando problemas que afetam o desempenho.
+
+Objetivos da Análise:
+1. Monitoramento de Operações: Acompanhar as operações de importação, separadas por modal aéreo e marítimo.
+2. Indicadores de Entrega: Avaliar o desempenho de entrega no prazo (On Time Delivery, também conhecido OTD) para cada modal, comparando com metas pré- estabelecidas.
+3. Desempenho de Operadores: Avaliar a performance de cada operador logístico (companhias de transporte) envolvidos nas entregas.
+4. Exceções: Identificar e categorizar desvios e exceções (tipos de problemas) no processo logístico que afetam a entrega pontual.
+Indicadores Chave de Desempenho (KPIs)
+• Quantidade de Embarques: Número total de embarques realizados, separados por modal.
+• OTD (On Time Delivery): Percentual de entregas realizadas dentro do prazo para cada modal, comparado com a meta estabelecida.
+Ranking de Exceções: Classificação dos principais tipos de exceções que causam desvios nas operações, como atrasos do fornecedor, avarias, problemas de
+documentação, etc.
+• Desempenho por Operador: Performance dos operadores logísticos (companhias de transporte), considerando a porcentagem de OTD e total de embarques.
+• Tendência Mensal OTD: Visualização de tendência mensal para identificar padrões de entregas ao longo do tempo.
+
+tabelas usadas para o case:
+	bandeiras_paises.csv 
+	cadastro_de_execoes.csv
+	cadastro_de_operadores_logisticos.csv
+	historico_importacao.csv
+
+chave de relacionamento: cod de exeção, id pais origem , id operador logistico/ carrier,
