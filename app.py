@@ -554,7 +554,7 @@ def layout_despesas():
         ])
     ])
 
-# Função para carregar e limpar dados de despesas pessoais
+# Função para carregar e limpar dados de despesas Gestor
 def load_personal_expenses_data(file_path='csv/despesas.csv'):
     try:
         # Ler o arquivo como texto para verificar linhas
@@ -595,7 +595,7 @@ def load_personal_expenses_data(file_path='csv/despesas.csv'):
         if df.empty:
             logger.warning("Nenhum dado válido encontrado após limpeza")
         else:
-            logger.info(f"Dados de despesas pessoais carregados de {file_path} com {len(df)} linhas")
+            logger.info(f"Dados de despesas Gestor carregados de {file_path} com {len(df)} linhas")
         return df
     except FileNotFoundError:
         logger.error(f"Arquivo {file_path} não encontrado")
@@ -604,14 +604,14 @@ def load_personal_expenses_data(file_path='csv/despesas.csv'):
         logger.error(f"Erro ao carregar {file_path}: {str(e)}")
         return pd.DataFrame()
 
-# Carregar os dados de despesas pessoais
+# Carregar os dados de despesas Gestor
 df_despesas_pessoais = load_personal_expenses_data()
 
-# Layout do Dashboard de Despesas Pessoais
+# Layout do Dashboard de Despesas Gestor
 def layout_despesas_pessoais():
     if df_despesas_pessoais.empty:
-        logger.warning("Dados de despesas pessoais vazios ou não carregados")
-        return html.Div("Erro: Dados de despesas pessoais não carregados.")
+        logger.warning("Dados de despesas Gestor vazios ou não carregados")
+        return html.Div("Erro: Dados de despesas Gestor não carregados.")
     
     # --- Métricas ---
     total_despesas = df_despesas_pessoais['Valor'].sum()
@@ -764,7 +764,7 @@ def layout_despesas_pessoais():
     ])
 
     return html.Div([
-        html.H2("Dashboard de Despesas Pessoais", className="text-2xl font-bold mb-4 text-gray-800"),
+        html.H2("Dashboard de Despesas Gestor", className="text-2xl font-bold mb-4 text-gray-800"),
         html.Div(className="card-container", children=[
             html.Div(className="card", children=[
                 html.H3("Total de Despesas"),
@@ -885,7 +885,7 @@ app.layout = html.Div([
         dcc.Link("Logística", href="/logistica", className="nav-link"),
         dcc.Link("Vendas", href="/vendas", className="nav-link"),
         dcc.Link("Despesas", href="/despesas", className="nav-link"),
-        dcc.Link("Despesas Pessoais", href="/despesas-pessoais", className="nav-link"),
+        dcc.Link("Despesas Gestor", href="/despesas-pessoais", className="nav-link"),
     ]),
     html.Div(id='page-content', className="content")
 ])
