@@ -2,7 +2,7 @@
 
 ## 🌟 Visão Geral
 Este projeto implementa um **Dashboard Geral da Empresa** utilizando Python, Dash e Plotly, com integração via Docker 🐳. O objetivo é fornecer uma visão consolidada e interativa das áreas financeira, logística e de vendas, conectando três dashboards especializados que atendem aos casos de uso descritos em `case_aula1.txt`, `case_aula2.txt` e `case_aula3.txt`. Um dashboard adicional para despesas da empresa e outro para despesas pessoais do gestor foram incluídos para análises específicas. Os dados são carregados de arquivos CSV, processados e visualizados em gráficos interativos para suportar a tomada de decisão estratégica 🚀.
-
+![Logo](docs/Dashboard_Geral.png)
 ## 📁 Estrutura do Projeto
 - **app.py** 🐍: Aplicação principal em Python usando Dash para criar os dashboards.
 - **requirements.txt** 📋: Lista de dependências (pandas, dash, plotly, gunicorn).
