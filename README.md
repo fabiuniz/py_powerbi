@@ -126,3 +126,8 @@ Este projeto implementa um **Dashboard Geral da Empresa** utilizando Python, Das
 ## 👨‍💻 Autor
 Desenvolvimento inspirado no curso de Power BI, adaptado para Dash e Plotly.
 **Data**: 30 de Maio de 2025 🗓️
+[Fabiano Rocha/Fabiuniz]
+
+## Licença
+
+[MIT License]
