@@ -564,7 +564,7 @@ def layout_despesas_pessoais():
             with open(file_path, 'r', encoding='utf-8') as file:
                 lines = file.readlines()
             logger.info(f"Total de linhas no arquivo {file_path}: {len(lines)}")
-            
+
             # Carregar o DataFrame
             df = pd.read_csv(
                 file_path, 
@@ -576,25 +576,25 @@ def layout_despesas_pessoais():
                 engine='python'
             )
             logger.info(f"Linhas carregadas antes da limpeza: {len(df)}")
-            
+
             # Remover linhas com valores nulos antes de conversão
             df = df.dropna(subset=['Data', 'Categoria', 'Valor'], how='any')
             logger.info(f"Linhas após remoção de nulos iniciais: {len(df)}")
-            
+
             # Converter e limpar
             df['Data'] = pd.to_datetime(df['Data'], format='%d/%m/%Y', errors='coerce')
             df['Valor'] = df['Valor'].astype(str).str.replace(',', '.', regex=False)
             df['Valor'] = pd.to_numeric(df['Valor'], errors='coerce')
             df['Valor'] = df['Valor'].apply(lambda x: abs(x) if pd.notnull(x) and x < 0 else x)
-            
+
             # Remover linhas com valores nulos após conversão
             df = df.dropna(subset=['Data', 'Categoria', 'Valor'], how='any')
             logger.info(f"Linhas após limpeza final: {len(df)}")
             logger.info(f"Primeiras linhas de df_despesas_pessoais: \n{df.head().to_string()}")
-            
+
             # Verificar transações específicas
             logger.info(f"Transações para 07/04/2025: \n{df[df['Data'] == '2025-04-07'].to_string()}")
-            
+
             if df.empty:
                 logger.warning("Nenhum dado válido encontrado após limpeza")
             else:
@@ -613,7 +613,7 @@ def layout_despesas_pessoais():
     if df_despesas_pessoais.empty:
         logger.warning("Dados de despesas Gestor vazios ou não carregados")
         return html.Div("Erro: Dados de despesas Gestor não carregados.")
-    
+
     # --- Métricas ---
     total_despesas = df_despesas_pessoais['Valor'].sum()
     media_despesa = df_despesas_pessoais['Valor'].mean()
@@ -706,12 +706,12 @@ def layout_despesas_pessoais():
         labels={'Data': 'Data', 'Valor': 'Valor (R$)'},
         color='Categoria',  # Colorir pontos pela categoria
         color_discrete_map={
-            'MERCADO': '#e74c3c',        # Red
-            'CONDOMINIO': '#3498db',     # Blue
-            'TELEFONE': '#2ecc71',       # Green
-            'INTERNET': '#f1c40f',       # Yellow
-            'RESTAURANTE': '#9b59b6',    # Purple
-            'Desconhecida': '#7f8c8d'    # Gray
+            'MERCADO': '#e74c3c',      # Red
+            'CONDOMINIO': '#3498db',   # Blue
+            'TELEFONE': '#2ecc71',      # Green
+            'INTERNET': '#f1c40f',      # Yellow
+            'RESTAURANTE': '#9b59b6',  # Purple
+            'Desconhecida': '#7f8c8d'  # Gray
         },  # Mapa de cores personalizado
         template="plotly_white",
         custom_data=['Categoria']
@@ -741,6 +741,32 @@ def layout_despesas_pessoais():
     fig_picos_diario.update_traces(
         hovertemplate='Data: %{x|%d/%m/%Y}<br>Valor: R$ %{y:,.2f}<br>Categoria: %{customdata}'
     )
+
+    # --- Gráfico 6: Gasto Mensal por Categoria (Linhas) ---
+    df_gasto_mensal_categoria = df_despesas_pessoais.groupby([
+        pd.Grouper(key='Data', freq='ME'),
+        'Categoria'
+    ])['Valor'].sum().reset_index()
+    
+    # Criar um gráfico de linhas para cada categoria
+    fig_gasto_mensal_categoria = px.line(
+        df_gasto_mensal_categoria, 
+        x='Data', 
+        y='Valor', 
+        color='Categoria', # Esta linha faz o Plotly criar uma linha para cada valor único na coluna 'Categoria'
+        title='Gasto Mensal por Categoria',
+        labels={'Data': 'Mês', 'Valor': 'Valor (R$)', 'Categoria': 'Categoria'},
+        template="plotly_white"
+    )
+    
+    fig_gasto_mensal_categoria.update_layout(
+        plot_bgcolor='white', paper_bgcolor='white', font_color='#2c3e50',
+        margin=dict(l=40, r=40, t=60, b=40), xaxis_title="Mês", yaxis_title="Valor (R$)",
+        xaxis=dict(showgrid=True, gridcolor='#e0e0e0'), yaxis=dict(showgrid=True, gridcolor='#e0e0e0')
+    )
+    fig_gasto_mensal_categoria.update_yaxes(rangemode='tozero')
+    hovertemplate='Mês: %{x|%b %Y}<br>Categoria: %{customdata}<br>Valor: R$ %{y:,.2f}'
+
 
     # --- Análise de Insights e Anomalias ---
     top_categoria = df_gasto_categoria.iloc[0]['Categoria']
@@ -787,6 +813,7 @@ def layout_despesas_pessoais():
             dcc.Graph(figure=fig_gasto_mensal, className="dashboard-section"),
             dcc.Graph(figure=fig_distribuicao, className="dashboard-section"),
             dcc.Graph(figure=fig_picos_diario, className="dashboard-section"),
+            dcc.Graph(figure=fig_gasto_mensal_categoria, className="dashboard-section"), # Novo gráfico adicionado aqui
             html.Div(insights, className="dashboard-section")
         ])
     ])
