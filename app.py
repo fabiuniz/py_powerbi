@@ -864,7 +864,7 @@ def get_relatorio_despesas_por_mes():
     # 3. Calcular a coluna 'Total' (soma de todos os meses)
     df_relatorio_mensal['Total'] = df_relatorio_mensal.sum(axis=1)
 
-    # 4. Resetar o índice para transformar as colunas 'Ano' e 'Categoria' em colunas de dados
+     # 4. Resetar o índice para transformar as colunas 'Ano' e 'Categoria' em colunas de dados
     df_relatorio_mensal = df_relatorio_mensal.reset_index()
 
     # Arredondar os valores para 2 casas decimais
@@ -874,6 +874,21 @@ def get_relatorio_despesas_por_mes():
     # Organizar a ordem das colunas para combinar com sua query
     colunas_ordenadas = ['Ano', 'Categoria'] + list(nomes_meses.values()) + ['Total']
     df_relatorio_mensal = df_relatorio_mensal[colunas_ordenadas]
+
+    # --- NOVO CÓDIGO AQUI: ADICIONAR LINHA DE TOTAIS ---
+    # Calcular a linha de totais somando cada coluna relevante
+    totais_por_mes = df_relatorio_mensal[list(nomes_meses.values()) + ['Total']].sum(numeric_only=True)
+
+    # Criar um DataFrame de uma linha para os totais
+    df_totais = pd.DataFrame([totais_por_mes], columns=totais_por_mes.index)
+
+    # Adicionar as colunas 'Ano' e 'Categoria' com valores de placeholder
+    df_totais['Ano'] = 'Total'
+    df_totais['Categoria'] = 'Total Geral'
+
+    # Juntar o DataFrame original com a nova linha de totais
+    df_relatorio_mensal = pd.concat([df_relatorio_mensal, df_totais], ignore_index=True)
+    # --- FIM DO NOVO CÓDIGO ---
 
     # Criar um gráfico de barras para o relatório mensal, se desejado
     fig_relatorio_barras = px.bar(
@@ -910,7 +925,6 @@ def get_relatorio_despesas_por_mes():
             }
         
         columns.append(col_def)
-
 
     # Layout para o Dash
     return html.Div([
