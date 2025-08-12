@@ -464,9 +464,10 @@ def layout_despesas():
     )
 
     # Gráfico de Rosca: Distribuição de Gastos (Top 5-7 + Outros)
+    tops = 10
     df_distribuicao = df_gasto_categoria.sort_values('Valor', ascending=False)
-    top_categorias = df_distribuicao.head(6)  # Top 6 categorias
-    outros_valor = df_distribuicao[6:]['Valor'].sum()  # Soma das demais
+    top_categorias = df_distribuicao.head(tops)  # Top 6 categorias
+    outros_valor = df_distribuicao[tops:]['Valor'].sum()  # Soma das demais
     df_distribuicao_final = pd.concat([
         top_categorias,
         pd.DataFrame({'Categoria': ['Outros'], 'Valor': [outros_valor]})
@@ -670,10 +671,11 @@ def layout_despesas_pessoais():
     fig_gasto_mensal.update_traces(hovertemplate='Mês: %{x|%b %Y}<br>Valor: R$ %{y:,.2f}')
 
     # --- Gráfico 4: Distribuição de Gastos (Rosca) ---
+    tops = 20
     df_distribuicao = df_despesas_pessoais.groupby('Categoria')['Valor'].sum().reset_index()
     df_distribuicao = df_distribuicao.sort_values('Valor', ascending=False)
-    top_categorias = df_distribuicao.head(6)
-    outros_valor = df_distribuicao['Valor'][6:].sum()
+    top_categorias = df_distribuicao.head(tops)
+    outros_valor = df_distribuicao['Valor'][tops:].sum()
     df_distribuicao_final = pd.concat([
         top_categorias,
         pd.DataFrame({'Categoria': ['Outros'], 'Valor': [outros_valor]})
