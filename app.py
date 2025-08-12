@@ -900,55 +900,51 @@ def get_relatorio_despesas_por_mes():
         template="plotly_white"
     )
 
+     # seja a escala máxima do eixo. Usei 4000 como exemplo, mas você
+    # pode calcular o valor máximo real do seu DataFrame
+    # se preferir `max_value = df_relatorio_mensal[colunas_para_arredondar].max().max() + 500`
+    fig_relatorio_barras.update_yaxes(range=[0, 4000])
+
+    # 2. Formatar o eixo y para exibir os valores como moeda, incluindo
+    # o símbolo 'R$' e o formato de milhar com ponto
     fig_relatorio_barras.update_layout(
         xaxis_title="Categoria",
-        yaxis_title="Valor (R$)"
+        yaxis_title="Valor (R$)",
+        yaxis=dict(tickprefix='R$ ',
+        tickformat=',.2f')
     )
-    # Inicializar a lista de colunas antes de usá-la.
-    columns = []
 
-    # Preparar a lista de colunas para o Dash
+    columns = []
     for i in df_relatorio_mensal.columns:
         col_def = {"name": i, "id": i}
 
-        # APLICAR FORMATAÇÃO NUMÉRICA AQUI
         if i == 'Ano':
             col_def["type"] = "numeric"
-        elif i in colunas_para_arredondar: # colunas_para_arredondar = list(nomes_meses.values()) + ['Total']
+        elif i in colunas_para_arredondar:
             col_def["type"] = "numeric"
             col_def["format"] = {
-                'specifier': '.2f',  # Formata como moeda, com 2 casas decimais
-                'locale': {                    
+                'specifier': '.2f',
+                'locale': {
                     'decimal': ',',
                     'group': '.'
                 }
             }
-        
         columns.append(col_def)
 
-    # Layout para o Dash
     return html.Div([
         html.H2("Relatório de Despesas Mensais por Categoria", className="text-2xl font-bold mb-4 text-gray-800"),
-
-        # Gráfico opcional para visualizar os dados da tabela
         dcc.Graph(figure=fig_relatorio_barras, className="dashboard-section"),
-
-        # Tabela do relatório
         html.Div(
             dash_table.DataTable(
                 id='table-relatorio-mensal',
-                #columns=[{"name": i, "id": i} for i in df_relatorio_mensal.columns],
-                columns=columns, 
+                columns=columns,
                 data=df_relatorio_mensal.to_dict('records'),
-                
-                # A chave 'overflowX': 'auto' é crucial para a rolagem horizontal
                 style_table={'overflowX': 'auto', 'margin': '20px 0'},
                 style_header={'backgroundColor': '#f8f9fa', 'fontWeight': 'bold'},
                 style_cell={
-                    # Valores ajustados para diminuir a largura das colunas
-                    'minWidth': '70px',  # Reduzido de 80px
-                    'width': '90px',     # Reduzido de 120px
-                    'maxWidth': '110px', # Reduzido de 180px
+                    'minWidth': '70px',
+                    'width': '90px',
+                    'maxWidth': '110px',
                     'whiteSpace': 'normal'
                 },
                 sort_action="native",
