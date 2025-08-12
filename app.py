@@ -7,6 +7,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime
 import logging
+import dash_table
 
 # Configurar o logging
 logging.basicConfig(
@@ -817,6 +818,133 @@ def layout_despesas_pessoais():
             html.Div(insights, className="dashboard-section")
         ])
     ])
+import dash_table
+
+def get_relatorio_despesas_por_mes():
+    # Carregar os dados de despesas pessoais (assumindo que esta função já existe e funciona)
+    # ou de um DataFrame global, se for o caso.
+    # Exemplo: df_despesas_pessoais = load_personal_expenses_data()
+    # Para este exemplo, usaremos o DataFrame de 'despesas.csv' fornecido
+    try:
+        df_despesas_pessoais = pd.read_csv(
+            'csv/despesas.csv',
+            sep=';',
+            encoding='utf-8',
+            parse_dates=['Data'],
+            date_format='%d/%m/%Y'
+        )
+        df_despesas_pessoais['Valor'] = df_despesas_pessoais['Valor'].astype(str).str.replace(',', '.', regex=False)
+        df_despesas_pessoais['Valor'] = pd.to_numeric(df_despesas_pessoais['Valor'], errors='coerce')
+        df_despesas_pessoais['Valor'] = df_despesas_pessoais['Valor'].abs()
+        df_despesas_pessoais.dropna(subset=['Data', 'Categoria', 'Valor'], inplace=True)
+    except FileNotFoundError:
+        return html.Div("Erro: Arquivo csv/despesa.csv não encontrado.")
+    except Exception as e:
+        return html.Div(f"Erro ao processar dados: {str(e)}")
+
+    if df_despesas_pessoais.empty:
+        return html.Div("Erro: Dados de despesas pessoais vazios ou não carregados.")
+
+    # Adicionar colunas de Ano e Mês
+    df_despesas_pessoais['Ano'] = df_despesas_pessoais['Data'].dt.year
+    df_despesas_pessoais['Mês'] = df_despesas_pessoais['Data'].dt.month
+
+    # Preparar os dados para o relatório (similar à sua query SQL)
+    # 1. Agrupar por Ano, Mês e Categoria, somando os valores
+    df_relatorio_mensal = df_despesas_pessoais.groupby(['Ano', 'Categoria', 'Mês'])['Valor'].sum().unstack(fill_value=0)
+
+    # 2. Renomear as colunas de mês para nomes em português
+    nomes_meses = {
+        1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril',
+        5: 'Maio', 6: 'Junho', 7: 'Julho', 8: 'Agosto',
+        9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro'
+    }
+    df_relatorio_mensal = df_relatorio_mensal.rename(columns=nomes_meses)
+
+    # 3. Calcular a coluna 'Total' (soma de todos os meses)
+    df_relatorio_mensal['Total'] = df_relatorio_mensal.sum(axis=1)
+
+    # 4. Resetar o índice para transformar as colunas 'Ano' e 'Categoria' em colunas de dados
+    df_relatorio_mensal = df_relatorio_mensal.reset_index()
+
+    # Arredondar os valores para 2 casas decimais
+    colunas_para_arredondar = list(nomes_meses.values()) + ['Total']
+    df_relatorio_mensal[colunas_para_arredondar] = df_relatorio_mensal[colunas_para_arredondar].round(2)
+
+    # Organizar a ordem das colunas para combinar com sua query
+    colunas_ordenadas = ['Ano', 'Categoria'] + list(nomes_meses.values()) + ['Total']
+    df_relatorio_mensal = df_relatorio_mensal[colunas_ordenadas]
+
+    # Criar um gráfico de barras para o relatório mensal, se desejado
+    fig_relatorio_barras = px.bar(
+        df_relatorio_mensal,
+        x='Categoria',
+        y=list(nomes_meses.values()),
+        title='Gasto Mensal por Categoria',
+        labels={'value': 'Valor (R$)', 'variable': 'Mês'},
+        template="plotly_white"
+    )
+
+    fig_relatorio_barras.update_layout(
+        xaxis_title="Categoria",
+        yaxis_title="Valor (R$)"
+    )
+    # Inicializar a lista de colunas antes de usá-la.
+    columns = []
+
+    # Preparar a lista de colunas para o Dash
+    for i in df_relatorio_mensal.columns:
+        col_def = {"name": i, "id": i}
+
+        # APLICAR FORMATAÇÃO NUMÉRICA AQUI
+        if i == 'Ano':
+            col_def["type"] = "numeric"
+        elif i in colunas_para_arredondar: # colunas_para_arredondar = list(nomes_meses.values()) + ['Total']
+            col_def["type"] = "numeric"
+            col_def["format"] = {
+                'specifier': '.2f',  # Formata como moeda, com 2 casas decimais
+                'locale': {                    
+                    'decimal': ',',
+                    'group': '.'
+                }
+            }
+        
+        columns.append(col_def)
+
+
+    # Layout para o Dash
+    return html.Div([
+        html.H2("Relatório de Despesas Mensais por Categoria", className="text-2xl font-bold mb-4 text-gray-800"),
+
+        # Gráfico opcional para visualizar os dados da tabela
+        dcc.Graph(figure=fig_relatorio_barras, className="dashboard-section"),
+
+        # Tabela do relatório
+        html.Div(
+            dash_table.DataTable(
+                id='table-relatorio-mensal',
+                #columns=[{"name": i, "id": i} for i in df_relatorio_mensal.columns],
+                columns=columns, 
+                data=df_relatorio_mensal.to_dict('records'),
+                
+                # A chave 'overflowX': 'auto' é crucial para a rolagem horizontal
+                style_table={'overflowX': 'auto', 'margin': '20px 0'},
+                style_header={'backgroundColor': '#f8f9fa', 'fontWeight': 'bold'},
+                style_cell={
+                    # Valores ajustados para diminuir a largura das colunas
+                    'minWidth': '70px',  # Reduzido de 80px
+                    'width': '90px',     # Reduzido de 120px
+                    'maxWidth': '110px', # Reduzido de 180px
+                    'whiteSpace': 'normal'
+                },
+                sort_action="native",
+                filter_action="native",
+                page_action="native",
+                page_size=30,
+                export_format="csv"
+            ), className="dashboard-section"
+        )
+    ])
 
 def layout_geral():
     total_financeiro_geral = df_financeiro['Valor'].sum() if not df_financeiro.empty else 0
@@ -915,6 +1043,7 @@ app.layout = html.Div([
         dcc.Link("Vendas", href="/vendas", className="nav-link"),
         dcc.Link("Despesas", href="/despesas", className="nav-link"),
         dcc.Link("Despesas Gestor", href="/despesas-pessoais", className="nav-link"),
+        dcc.Link("Despesas Gestor2", href="/get_relatorio_despesas_por_mes", className="nav-link"),
     ]),
     html.Div(id='page-content', className="content")
 ])
@@ -935,6 +1064,8 @@ def display_page(pathname):
         return layout_despesas()
     elif pathname == '/despesas-pessoais':
         return layout_despesas_pessoais()
+    elif pathname == '/get_relatorio_despesas_por_mes':
+        return get_relatorio_despesas_por_mes()
     else:
         return layout_geral()
 

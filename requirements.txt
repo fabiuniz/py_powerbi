@@ -1,5 +1,6 @@
 # requirements.txt
 pandas
 dash
+dash-table
 plotly
 gunicorn # Necessário para rodar a aplicação em produção com Docker
