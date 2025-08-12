@@ -48,32 +48,34 @@ def parse_statement_lines(lines):
 def categorize_transactions(df, categorization_rules):
     """
     Categoriza as transações com base em um dicionário de regras.
-    Aceita regras simples (lista de regex) e regras complexas (dict com descricao e valor).
+    Aceita regras simples (regex string) e regras complexas (dict com descricao e valor).
     """
     df['Categoria'] = 'Nao_Categorizado'
     # Converte o valor para float, substituindo a vírgula por ponto
     df['Valor_num'] = df['Valor'].str.replace(',', '.').astype(float)
     
     for category, rules in categorization_rules.items():
-        # Verifica se a regra é uma lista de regex (caso simples)
-        if isinstance(rules, list):
-            for pattern in rules:
-                mask = df['Descricao'].str.contains(pattern, case=False, na=False)
+        # AQUI É A MUDANÇA: Agora, 'rules' é sempre uma lista.
+        # Vamos iterar sobre cada item dentro dessa lista.
+        for rule in rules:
+            # Se o item da lista for uma string, é uma regra simples
+            if isinstance(rule, str):
+                mask = df['Descricao'].str.contains(rule, case=False, na=False)
                 df.loc[mask, 'Categoria'] = category
-        
-        # Verifica se a regra é um dicionário (caso complexo com valor)
-        elif isinstance(rules, dict):
-            descricao_pattern = rules.get('descricao')
-            valor_alvo = rules.get('valor')
             
-            # Se as duas condições (descricao e valor) existirem, aplique a máscara dupla
-            if descricao_pattern and valor_alvo is not None:
-                descricao_mask = df['Descricao'].str.contains(descricao_pattern, case=False, na=False)
-                valor_mask = df['Valor_num'] == valor_alvo
+            # Se o item da lista for um dicionário, é uma regra complexa
+            elif isinstance(rule, dict):
+                descricao_pattern = rule.get('descricao')
+                valor_alvo = rule.get('valor')
                 
-                # A categoria é aplicada apenas quando AMBAS as máscaras são verdadeiras
-                combined_mask = descricao_mask & valor_mask
-                df.loc[combined_mask, 'Categoria'] = category
+                # Se as duas condições (descricao e valor) existirem, aplique a máscara dupla
+                if descricao_pattern and valor_alvo is not None:
+                    descricao_mask = df['Descricao'].str.contains(descricao_pattern, case=False, na=False)
+                    valor_mask = df['Valor_num'] == valor_alvo
+                    
+                    # A categoria é aplicada apenas quando AMBAS as máscaras são verdadeiras
+                    combined_mask = descricao_mask & valor_mask
+                    df.loc[combined_mask, 'Categoria'] = category
 
     # Identifica e coleta as descrições não categorizadas
     uncategorized_descriptions = df[df['Categoria'] == 'Nao_Categorizado']['Descricao'].unique().tolist()
@@ -116,6 +118,24 @@ def process_full_statement(file_path, categorization_rules):
 
     return df_raw, None # Retorna o DataFrame bruto e None para o categorizado, pois a categorização será feita no final.
 
+def add_txt(df, file_path):
+    """
+    Salva as transações de um DataFrame em um arquivo de texto.
+
+    Args:
+        df (pd.DataFrame): O DataFrame a ser salvo.
+        file_path (str): O caminho e nome do arquivo de saída.
+    """
+    with open(file_path, 'w', encoding='utf-8') as f:
+        f.write("--- Transações não categorizadas ---\n")
+        f.write("-" * 50 + "\n")
+        
+        for index, row in df.iterrows():
+            linha = f"Data: {row['Data']:<10} | Descrição: {row['Descricao']:<40} | Valor: {row['Valor']}\n"
+            f.write(linha)
+            
+        f.write("-" * 50 + "\n")
+
 # --- Bloco principal de execução ---
 if __name__ == '__main__':
 
@@ -134,6 +154,8 @@ if __name__ == '__main__':
         # Concatena todos os DataFrames em um único DataFrame grande.
         print("\n--- 3. Unindo todos os arquivos processados em um único DataFrame...")
         df_combined = pd.concat(all_dataframes, ignore_index=True)
+
+        add_txt(df_combined, "../csv/rep_combined_trated.log")
         
         print("--- 4. Categorizando todas as transações...")
         df_categorized, _ = categorize_transactions(df_combined.copy(), categorization_rules)
@@ -141,13 +163,23 @@ if __name__ == '__main__':
         # Filtra o DataFrame para encontrar as transações não categorizadas
         uncategorized_df = df_categorized[df_categorized['Categoria'] == 'Nao_Categorizado'].copy()
 
-        # Uma máscara booleana que é True para as linhas que têm as descrições para remover
-        mascara_remocao = uncategorized_df['Descricao'].isin(descricoes_para_remover)
+        # Une a lista em uma única expressão regular
+        padrao_regex = '|'.join(descricoes_para_remover)
 
-        # Operador ~ para inverter a máscara e selecionar apenas as linhas que você QUER manter
+        # Cria a máscara para identificar as linhas que contêm qualquer um dos padrões
+        mascara_remocao = uncategorized_df['Descricao'].str.contains(padrao_regex, case=False, na=False)
+
+        mascara_remocao = uncategorized_df['Descricao'].str.contains(padrao_regex, case=False, na=False)
+
+        # Aplique a máscara invertida para manter as linhas que você NÃO quer remover.
         uncategorized_df_filtrado = uncategorized_df[~mascara_remocao]
 
         if not uncategorized_df_filtrado.empty:
+
+            output_txt_path = '..\csv\descricoes_nao_categorizadas.log'
+                # Chama a função para salvar as transações não categorizadas
+            add_txt(uncategorized_df_filtrado, output_txt_path)
+
             print("\n--- ATENÇÃO: Descrições não categorizadas encontradas! ---")
             print("As seguintes transações serão salvas com a categoria 'Nao_Categorizado':")
             

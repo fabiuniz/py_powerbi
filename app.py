@@ -555,61 +555,61 @@ def layout_despesas():
         ])
     ])
 
-# Função para carregar e limpar dados de despesas Gestor
-def load_personal_expenses_data(file_path='csv/despesas.csv'):
-    try:
-        # Ler o arquivo como texto para verificar linhas
-        with open(file_path, 'r', encoding='utf-8') as file:
-            lines = file.readlines()
-        logger.info(f"Total de linhas no arquivo {file_path}: {len(lines)}")
-        
-        # Carregar o DataFrame
-        df = pd.read_csv(
-            file_path, 
-            sep=';', 
-            encoding='utf-8', 
-            on_bad_lines=lambda x: logger.warning(f"Linha inválida ignorada: {x}"), 
-            names=['Data', 'Categoria', 'Valor'], 
-            skiprows=1, 
-            engine='python'
-        )
-        logger.info(f"Linhas carregadas antes da limpeza: {len(df)}")
-        
-        # Remover linhas com valores nulos antes de conversão
-        df = df.dropna(subset=['Data', 'Categoria', 'Valor'], how='any')
-        logger.info(f"Linhas após remoção de nulos iniciais: {len(df)}")
-        
-        # Converter e limpar
-        df['Data'] = pd.to_datetime(df['Data'], format='%d/%m/%Y', errors='coerce')
-        df['Valor'] = df['Valor'].astype(str).str.replace(',', '.', regex=False)
-        df['Valor'] = pd.to_numeric(df['Valor'], errors='coerce')
-        df['Valor'] = df['Valor'].apply(lambda x: abs(x) if pd.notnull(x) and x < 0 else x)
-        
-        # Remover linhas com valores nulos após conversão
-        df = df.dropna(subset=['Data', 'Categoria', 'Valor'], how='any')
-        logger.info(f"Linhas após limpeza final: {len(df)}")
-        logger.info(f"Primeiras linhas de df_despesas_pessoais: \n{df.head().to_string()}")
-        
-        # Verificar transações específicas
-        logger.info(f"Transações para 07/04/2025: \n{df[df['Data'] == '2025-04-07'].to_string()}")
-        
-        if df.empty:
-            logger.warning("Nenhum dado válido encontrado após limpeza")
-        else:
-            logger.info(f"Dados de despesas Gestor carregados de {file_path} com {len(df)} linhas")
-        return df
-    except FileNotFoundError:
-        logger.error(f"Arquivo {file_path} não encontrado")
-        return pd.DataFrame()
-    except Exception as e:
-        logger.error(f"Erro ao carregar {file_path}: {str(e)}")
-        return pd.DataFrame()
-
-# Carregar os dados de despesas Gestor
-df_despesas_pessoais = load_personal_expenses_data()
-
 # Layout do Dashboard de Despesas Gestor
 def layout_despesas_pessoais():
+    # Função para carregar e limpar dados de despesas Gestor
+    def load_personal_expenses_data(file_path='csv/despesas.csv'):
+        try:
+            # Ler o arquivo como texto para verificar linhas
+            with open(file_path, 'r', encoding='utf-8') as file:
+                lines = file.readlines()
+            logger.info(f"Total de linhas no arquivo {file_path}: {len(lines)}")
+            
+            # Carregar o DataFrame
+            df = pd.read_csv(
+                file_path, 
+                sep=';', 
+                encoding='utf-8', 
+                on_bad_lines=lambda x: logger.warning(f"Linha inválida ignorada: {x}"), 
+                names=['Data', 'Categoria', 'Valor'], 
+                skiprows=1, 
+                engine='python'
+            )
+            logger.info(f"Linhas carregadas antes da limpeza: {len(df)}")
+            
+            # Remover linhas com valores nulos antes de conversão
+            df = df.dropna(subset=['Data', 'Categoria', 'Valor'], how='any')
+            logger.info(f"Linhas após remoção de nulos iniciais: {len(df)}")
+            
+            # Converter e limpar
+            df['Data'] = pd.to_datetime(df['Data'], format='%d/%m/%Y', errors='coerce')
+            df['Valor'] = df['Valor'].astype(str).str.replace(',', '.', regex=False)
+            df['Valor'] = pd.to_numeric(df['Valor'], errors='coerce')
+            df['Valor'] = df['Valor'].apply(lambda x: abs(x) if pd.notnull(x) and x < 0 else x)
+            
+            # Remover linhas com valores nulos após conversão
+            df = df.dropna(subset=['Data', 'Categoria', 'Valor'], how='any')
+            logger.info(f"Linhas após limpeza final: {len(df)}")
+            logger.info(f"Primeiras linhas de df_despesas_pessoais: \n{df.head().to_string()}")
+            
+            # Verificar transações específicas
+            logger.info(f"Transações para 07/04/2025: \n{df[df['Data'] == '2025-04-07'].to_string()}")
+            
+            if df.empty:
+                logger.warning("Nenhum dado válido encontrado após limpeza")
+            else:
+                logger.info(f"Dados de despesas Gestor carregados de {file_path} com {len(df)} linhas")
+            return df
+        except FileNotFoundError:
+            logger.error(f"Arquivo {file_path} não encontrado")
+            return pd.DataFrame()
+        except Exception as e:
+            logger.error(f"Erro ao carregar {file_path}: {str(e)}")
+            return pd.DataFrame()
+
+    # Carregar os dados de despesas Gestor
+    df_despesas_pessoais = load_personal_expenses_data()
+
     if df_despesas_pessoais.empty:
         logger.warning("Dados de despesas Gestor vazios ou não carregados")
         return html.Div("Erro: Dados de despesas Gestor não carregados.")
