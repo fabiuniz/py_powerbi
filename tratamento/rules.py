@@ -1,43 +1,42 @@
 # rules.py
 categorization_rules = {
+        #'AURUM': [r'AURUM'],
         'ACOUGUE': [r'CASA DE CAR',r'WEST BOI'],
         'AEROPORTO':[r'GRU '],
         'BANCO': [r'SEGURO CARTAO'],
         'BELEZA' :[r'TAIYANG'],
+        'COSTURA' :[r'TIAGO MAQUI',r'FIVELAS',r'TECIDOS'],
         'CONDOMINIO': [
-            {'descricao': r'PAG BOLETO|MOBILEPAG', 'valor': -529.76},
-            {'descricao': r'MOBILEPAG', 'valor': -383.02},
-            r'MOBILE PAG',
-            r'CONJUNTO RESIDENCIAL'
+            {'descricao': r'PAG BOLETO|MOBILEPAG|CONDOMINIO|RESIDENCIAL', 'valor_entre': [-600.00, -380.00]},            
         ],
-        'ESTACIONAMENTO': [r'ESTAC ',r'PARK ',r'ESTAPAR',r'RSHOP-SP MARKET'],
-        'FARMACIA': [r'DROGA',r'FARMACIA', r'DROGARIA',r'FARMA'],
+        'ESTACIONAMENTO': [r'Estacion',r'ESTAC ',r'PARK ',r'ESTAPAR',r'RSHOP-SP MARKET'],
+        'FARMACIA': [r'GOYA PERFU',r'USEMAISFARM',r'DROGA',r'FARMACIA', r'DROGARIA',r'FARMA'],
         'GAS': [r' GAS ',r'INT COMGAS',r'COMGAS'],
-        'GASOLINA': [r'AUTOSUL', r'RSHOP AUTO POSTO', r'RSHOP-AUTO POSTO',r'N S FATIMA'],
-        'VIAGEN': [r'FOZ PLAZA',r'RSHOP PANORAMA ',r'NATURAL TRAV',r'AUTOZONE BRA',r'CATARA',r'ESPACO DAS A'],
+        'GASOLINA': [r'PETROL ',r'AUTOSUL', r'RSHOP AUTO POSTO', r'RSHOP-AUTO POSTO',r'N S FATIMA'],
         'HOTFRUIT': [r'FRUTAO',r'CHACARA DO',r'Hortifruti',r'HORTIFRU'],
-        'IGREJA': [r'ADS',r'SOCIEDADE B', r'ADSA'],
+        'IGREJA': [r'CONADIBE',r'ADS',r'SOCIEDADE B', r'ADSA'],
         'IMPRESORA':[r'PONTODOSCAR'],
         'INTERNET': [r'INTERNET', r'NET', r'CLARO'],
         'LUZ': [r'ELETROPAULO'],
-        'MECANICO' :[r'Mercadocar',r'PREMYER',r'CENTRO AUTO',r'CLIMATOA'],
-        'MERCADO': [r'CHOCOLANDIA',r'EXTRA HIPER',r'ATACADAO',r'MERCADINHO',r'PANIF',r'PADARIA',r'CARREFOUR', r'RSHOP BIG BOM', r'RSHOP MERCADO ', r'RSHOP MARCO', r'RSHOP MUFFATO', r'SUPERMERCADO', r'RSHOP-MERCADO'],
+        'MECANICO' :[r' AUTOPE',r'Mercadocar',r'PREMYER',r'CENTRO AUTO',r'CLIMATOA'],
+        'MERCADO': [r'SUP CERCADAO',r'OXXO',r'PAO DE AC',r'MiniMercado',r'SUPERM',r'MERCEARIA',r'CHOCOLANDIA',r'EXTRA HIPER',r'ATACADAO',r'MERCADINHO',r'PANIF',r'PADARIA',r'CARREFOUR', r'RSHOP BIG BOM', r'RSHOP MERCADO ', r'RSHOP MARCO', r'RSHOP MUFFATO', r'SUPERMERCADO', r'RSHOP-MERCADO'],
+        'MATERIAL' :[r'TINTAS'],
         'OUTROS': [r'EDUARDODIAS', r'MARIVANLIMA'],
         'PAPELARIA': [r'LAN HOUSE',r'KALUNGA'],
         'PREFEITURA':[r'INT PM SAO PAU',r'INT LICENC SP',r'INT MULTA ',r'IPTU'],        
-        'RESTAURANTE': [r'DONALD',r'FRIED CHICKE',r'THE STEAK ',r'CHURRASCARI',r'SUSHI',r'AQUARELA ',r'FRIENDS ',r'DOGAO',r'Feijoada',r'PASTEL',r'Espeto',r'Bacio di',r'VIVENDA DO',r'FRANGO', r'Restaura', r'RSHOP-DOGAO DO', r'RSHOP-SANTA GULA', r'RSHOP-VIVENDA DO', r'RSHOP ESPETO', r'RESTAURANTE', r'PIZZARIA', r'RSHOP-ESPETO'],
+        'RESTAURANTE': [r'ESFIHA',r'DOGDODIE',r'JIN JIN',r'MP CALDODE',r'MEI MEI',r'EXPRESS GRI',r'Cafeteria',r'CAFE ',r'MANIA DE CHU',r'SABORINI',r'EMPORIO',r'PONTO SP MA',r'DONALD',r'FRIED CHICKE',r'THE STEAK ',r'CHURRASCARI',r'SUSHI',r'AQUARELA ',r'FRIENDS ',r'DOGAO',r'Feijoada',r'PASTEL',r'Espeto',r'Bacio di',r'VIVENDA DO',r'FRANGO', r'Restaura', r'RSHOP-DOGAO DO', r'RSHOP-SANTA GULA', r'RSHOP-VIVENDA DO', r'RSHOP ESPETO', r'RESTAURANTE', r'PIZZARIA', r'RSHOP-ESPETO'],
         'SAQUE': [r'SAQUE', r'CXE'],
-        'SEGURO':[r'INT TED D',r'BOLETO PORTO S'],
+        'SEGURO':[r'PORTO',r'INT TED D',r'BOLETO PORTO S'],
         'SHOPPING': [r'RIACHUE',r'DAISO',r'LOJAS AMERI',r'BAHIA',r'CELLSHOP',r'SHOPPING',r'SP MARKET',r'LOJAS RENNE',r'RSHOP-RIACHUELO'],
         'TARIFA':[r'TARIFA TRAN',r'ITAU'],
         'TELEFONE': [
             r'INT PRE-PAGO',
-            r'MOBILEPAG TIT',
+            {'descricao': r'PAG BOLETO|MOBILEPAG|MOBILE PAG', 'valor_entre': [-280.00, -40.00]},
             r'VIVO',
-            r'CLARO',
-            {'descricao': r'PAG BOLETO', 'valor': -61.93},          
+            r'CLARO'            
         ],
-        'TRANSFERENCIAS' :[r'TED D',r'TBI ',r' TRANSF ']        
+        'TRANSFERENCIAS' :[r'TED D',r'TBI ',r' TRANSF '],
+        'VIAGEN': [r'FAZENDA GRA',r'FOZ PLAZA',r'RSHOP PANORAMA ',r'NATURAL TRAV',r'AUTOZONE BRA',r'CATARA',r'ESPACO DAS A']
     }
 
 # As descrições que você quer remover

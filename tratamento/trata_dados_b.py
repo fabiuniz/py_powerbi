@@ -55,27 +55,49 @@ def categorize_transactions(df, categorization_rules):
     df['Valor_num'] = df['Valor'].str.replace(',', '.').astype(float)
     
     for category, rules in categorization_rules.items():
-        # AQUI É A MUDANÇA: Agora, 'rules' é sempre uma lista.
-        # Vamos iterar sobre cada item dentro dessa lista.
         for rule in rules:
+            
+            # --- Inicia a máscara de categorização ---
+            combined_mask = pd.Series([True] * len(df))
+
             # Se o item da lista for uma string, é uma regra simples
             if isinstance(rule, str):
-                mask = df['Descricao'].str.contains(rule, case=False, na=False)
-                df.loc[mask, 'Categoria'] = category
+                descricao_pattern = rule
             
             # Se o item da lista for um dicionário, é uma regra complexa
             elif isinstance(rule, dict):
                 descricao_pattern = rule.get('descricao')
-                valor_alvo = rule.get('valor')
+                valor_exato = rule.get('valor_exato')
+                valor_maior_que = rule.get('valor_maior_que')
+                valor_menor_que = rule.get('valor_menor_que')
+                valor_entre = rule.get('valor_entre')
                 
-                # Se as duas condições (descricao e valor) existirem, aplique a máscara dupla
-                if descricao_pattern and valor_alvo is not None:
-                    descricao_mask = df['Descricao'].str.contains(descricao_pattern, case=False, na=False)
-                    valor_mask = df['Valor_num'] == valor_alvo
-                    
-                    # A categoria é aplicada apenas quando AMBAS as máscaras são verdadeiras
-                    combined_mask = descricao_mask & valor_mask
-                    df.loc[combined_mask, 'Categoria'] = category
+                if valor_exato is not None:
+                    valor_mask = df['Valor_num'] == valor_exato
+                    combined_mask = combined_mask & valor_mask
+                
+                if valor_maior_que is not None:
+                    valor_mask = df['Valor_num'] > valor_maior_que
+                    combined_mask = combined_mask & valor_mask
+                
+                if valor_menor_que is not None:
+                    valor_mask = df['Valor_num'] < valor_menor_que
+                    combined_mask = combined_mask & valor_mask
+                
+                if valor_entre is not None and len(valor_entre) == 2:
+                    valor_min, valor_max = valor_entre
+                    valor_mask = (df['Valor_num'] >= valor_min) & (df['Valor_num'] <= valor_max)
+                    combined_mask = combined_mask & valor_mask
+            
+            # Se houver um padrão de descrição, aplica a máscara.
+            # Esta verificação é comum para regras simples e complexas.
+            if descricao_pattern:
+                descricao_mask = df['Descricao'].str.contains(descricao_pattern, case=False, na=False)
+                combined_mask = combined_mask & descricao_mask
+
+            # Aplica a categoria APENAS se a categoria atual for 'Nao_Categorizado'.
+            # Isso impede a sobrescrita.
+            df.loc[combined_mask & (df['Categoria'] == 'Nao_Categorizado'), 'Categoria'] = category
 
     # Identifica e coleta as descrições não categorizadas
     uncategorized_descriptions = df[df['Categoria'] == 'Nao_Categorizado']['Descricao'].unique().tolist()
@@ -157,71 +179,43 @@ if __name__ == '__main__':
         print("--- 4. Categorizando todas as transações...")
         df_categorized, _ = categorize_transactions(df_combined.copy(), categorization_rules)
 
-        # ... (código de filtragem para descrições não categorizadas) ...
-        
-        # --- Passo 5: Chamada da função de limpeza e ordenação ---
-        print("--- 5. Removendo duplicatas e ordenando o DataFrame...")
-        final_df = clean_and_sort_dataframe(df_categorized.copy())
-        
-        # AQUI É O PONTO CRÍTICO. Antes de chamar add_txt,
-        # garanta que a coluna 'Data' está em formato de string.
-        final_df['Data'] = final_df['Data'].dt.strftime('%d/%m/%Y')
-        
-        # Agora chame a função com o DataFrame já pronto e formatado
-        add_txt(final_df, "../logs/rep_combined_trated.log")
-        
-        print("--- 4. Categorizando todas as transações...")
-        df_categorized, _ = categorize_transactions(df_combined.copy(), categorization_rules)
+        # --- NOVO PASSO: Removendo descrições indesejadas do DataFrame completo ---
+        print("--- 4.1. Removendo descrições indesejadas...")
+        padrao_regex = '|'.join(descricoes_para_remover)
+        mascara_remocao = df_categorized['Descricao'].str.contains(padrao_regex, case=False, na=False)
+        df_filtrado_final = df_categorized[~mascara_remocao].copy()
 
         # Filtra o DataFrame para encontrar as transações não categorizadas
-        uncategorized_df = df_categorized[df_categorized['Categoria'] == 'Nao_Categorizado'].copy()
+        uncategorized_df = df_filtrado_final[df_filtrado_final['Categoria'] == 'Nao_Categorizado'].copy()
 
-        # Une a lista em uma única expressão regular
-        padrao_regex = '|'.join(descricoes_para_remover)
-
-        # Cria a máscara para identificar as linhas que contêm qualquer um dos padrões
-        mascara_remocao = uncategorized_df['Descricao'].str.contains(padrao_regex, case=False, na=False)
-
-        mascara_remocao = uncategorized_df['Descricao'].str.contains(padrao_regex, case=False, na=False)
-
-        # Aplique a máscara invertida para manter as linhas que você NÃO quer remover.
-        uncategorized_df_filtrado = uncategorized_df[~mascara_remocao]
-
-        if not uncategorized_df_filtrado.empty:
+        if not uncategorized_df.empty:
             # 1. Converte a coluna 'Data' para datetime
-            uncategorized_df_filtrado['Data'] = pd.to_datetime(uncategorized_df_filtrado['Data'], format='%d/%m/%Y')
+            uncategorized_df['Data'] = pd.to_datetime(uncategorized_df['Data'], format='%d/%m/%Y')
             
             # 2. Ordena o DataFrame pela data em ordem decrescente
-            uncategorized_df_filtrado = uncategorized_df_filtrado.sort_values(by='Data', ascending=False)
+            uncategorized_df = uncategorized_df.sort_values(by='Data', ascending=False)
             
             # 3. Formata a coluna 'Data' de volta para string antes de salvar
-            uncategorized_df_filtrado['Data'] = uncategorized_df_filtrado['Data'].dt.strftime('%d/%m/%Y')
+            uncategorized_df['Data'] = uncategorized_df['Data'].dt.strftime('%d/%m/%Y')
             
             output_txt_path = '..\logs\descricoes_nao_categorizadas.log'
-                # Chama a função para salvar as transações não categorizadas
-            add_txt(uncategorized_df_filtrado, output_txt_path)
+            # Chama a função para salvar as transações não categorizadas
+            add_txt(uncategorized_df, output_txt_path)
 
             print("\n--- ATENÇÃO: Descrições não categorizadas encontradas! ---")
             print("As seguintes transações serão salvas com a categoria 'Nao_Categorizado':")
             
             # Exibe as 3 colunas (Data, Descricao, Valor)
             print("-" * 50)
-            for index, row in uncategorized_df_filtrado.iterrows():
+            for index, row in uncategorized_df.iterrows():
                 print(f"Data: {row['Data']:<10} | Descrição: {row['Descricao']:<40} | Valor: {row['Valor']}")
             print("-" * 50)
             
-            # Para o seu código, o DataFrame final pode ser o df_categorized completo
-            final_df = df_categorized.copy()
         else:
             print("\n--- Todas as descrições foram categorizadas com sucesso! ---")
-            final_df = df_categorized.copy()
         
-        # O DataFrame 'df_categorized' já contém todas as transações,
-        # incluindo as que foram marcadas como 'Nao_Categorizado'.
-        # Não é mais necessário filtrar, então podemos atribuir diretamente.
-        #E Identar essa linha para Adicionar filtro eliminando Nao_Categorizado
-        final_df = df_categorized.copy()
-
+        final_df = df_filtrado_final.copy()
+        
         # --- Passo 5: Chamada da função de limpeza e ordenação ---
         print("--- 5. Removendo duplicatas e ordenando o DataFrame...")
         final_df = clean_and_sort_dataframe(final_df)
