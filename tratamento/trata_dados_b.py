@@ -94,7 +94,7 @@ def clean_and_sort_dataframe(df):
     df_cleaned['Data'] = pd.to_datetime(df_cleaned['Data'], format='%d/%m/%Y')
     
     # Ordena o DataFrame pela coluna 'Data' em ordem crescente.
-    df_sorted = df_cleaned.sort_values(by='Data')
+    df_sorted = df_cleaned.sort_values(by='Data', ascending=False)
     
     return df_sorted
 
@@ -151,11 +151,24 @@ if __name__ == '__main__':
     
     # Se houver DataFrames para concatenar, continua o processamento.
     if all_dataframes:
-        # Concatena todos os DataFrames em um único DataFrame grande.
         print("\n--- 3. Unindo todos os arquivos processados em um único DataFrame...")
         df_combined = pd.concat(all_dataframes, ignore_index=True)
 
-        add_txt(df_combined, "../csv/rep_combined_trated.log")
+        print("--- 4. Categorizando todas as transações...")
+        df_categorized, _ = categorize_transactions(df_combined.copy(), categorization_rules)
+
+        # ... (código de filtragem para descrições não categorizadas) ...
+        
+        # --- Passo 5: Chamada da função de limpeza e ordenação ---
+        print("--- 5. Removendo duplicatas e ordenando o DataFrame...")
+        final_df = clean_and_sort_dataframe(df_categorized.copy())
+        
+        # AQUI É O PONTO CRÍTICO. Antes de chamar add_txt,
+        # garanta que a coluna 'Data' está em formato de string.
+        final_df['Data'] = final_df['Data'].dt.strftime('%d/%m/%Y')
+        
+        # Agora chame a função com o DataFrame já pronto e formatado
+        add_txt(final_df, "../logs/rep_combined_trated.log")
         
         print("--- 4. Categorizando todas as transações...")
         df_categorized, _ = categorize_transactions(df_combined.copy(), categorization_rules)
@@ -175,8 +188,16 @@ if __name__ == '__main__':
         uncategorized_df_filtrado = uncategorized_df[~mascara_remocao]
 
         if not uncategorized_df_filtrado.empty:
-
-            output_txt_path = '..\csv\descricoes_nao_categorizadas.log'
+            # 1. Converte a coluna 'Data' para datetime
+            uncategorized_df_filtrado['Data'] = pd.to_datetime(uncategorized_df_filtrado['Data'], format='%d/%m/%Y')
+            
+            # 2. Ordena o DataFrame pela data em ordem decrescente
+            uncategorized_df_filtrado = uncategorized_df_filtrado.sort_values(by='Data', ascending=False)
+            
+            # 3. Formata a coluna 'Data' de volta para string antes de salvar
+            uncategorized_df_filtrado['Data'] = uncategorized_df_filtrado['Data'].dt.strftime('%d/%m/%Y')
+            
+            output_txt_path = '..\logs\descricoes_nao_categorizadas.log'
                 # Chama a função para salvar as transações não categorizadas
             add_txt(uncategorized_df_filtrado, output_txt_path)
 
