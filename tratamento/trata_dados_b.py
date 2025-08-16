@@ -175,15 +175,24 @@ if __name__ == '__main__':
     if all_dataframes:
         print("\n--- 3. Unindo todos os arquivos processados em um único DataFrame...")
         df_combined = pd.concat(all_dataframes, ignore_index=True)
-
         print("--- 4. Categorizando todas as transações...")
         df_categorized, _ = categorize_transactions(df_combined.copy(), categorization_rules)
 
-        # --- NOVO PASSO: Removendo descrições indesejadas do DataFrame completo ---
+        # --- Removendo descrições indesejadas do DataFrame completo ---
         print("--- 4.1. Removendo descrições indesejadas...")
         padrao_regex = '|'.join(descricoes_para_remover)
         mascara_remocao = df_categorized['Descricao'].str.contains(padrao_regex, case=False, na=False)
         df_filtrado_final = df_categorized[~mascara_remocao].copy()
+
+        # --- Removendo duplicados
+        df_combined.drop_duplicates(inplace=True)
+        # Converte 'Data' para datetime, ordena e formata de volta para string
+        df_combined['Data'] = pd.to_datetime(df_combined['Data'], format='%d/%m/%Y', errors='coerce')
+        df_combined = df_combined.sort_values(by='Data', ascending=False)
+        df_combined['Data'] = df_combined['Data'].dt.strftime('%d/%m/%Y')
+        
+        # Salva o DataFrame já ordenado no arquivo de log
+        add_txt(df_combined, "../logs/rep_combined_trated.log")
 
         # Filtra o DataFrame para encontrar as transações não categorizadas
         uncategorized_df = df_filtrado_final[df_filtrado_final['Categoria'] == 'Nao_Categorizado'].copy()
@@ -234,6 +243,9 @@ if __name__ == '__main__':
 
         # Define o caminho e o nome do arquivo de saída
         output_csv_path = '../csv/despesas_processadas.csv'
+        
+        # Remove duplicidades
+        final_df.drop_duplicates(inplace=True)
         
         # Salva o DataFrame em um arquivo CSV
         final_df.to_csv(output_csv_path, sep=';', index=False)

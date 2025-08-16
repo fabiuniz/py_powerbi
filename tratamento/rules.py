@@ -1,6 +1,6 @@
 # rules.py
 categorization_rules = {
-        #'AURUM': [r'AURUM'],
+        'AURUM': [r'AURUM'],
         'ACOUGUE': [r'CASA DE CAR',r'WEST BOI'],
         'AEROPORTO':[r'GRU '],
         'BANCO': [r'SEGURO CARTAO'],
