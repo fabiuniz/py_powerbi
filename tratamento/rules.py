@@ -49,29 +49,16 @@ descricoes_para_remover = [
 
 # Os arquivos para extrair informações     # pdftotext.exe
 file_paths = [
-        #'../../../../Doc/Docs/Extratos/extrato_2012_ContaCorrente.txt',    # 09/12    
-        #'../../../../Doc/Docs/Extratos/extrato_2012_ContaCorrente2.txt'    # 10/12    
-        '../../../../Doc/Docs/Extratos/extrato_072025_250921_091826.txt',
-        '../../../../Doc/Docs/Extratos/extrato_072025_250905_170222.txt',
+        '../../../../Doc/Docs/Extratos/extrato_072025_250921_091826.txt',  # 07/25 a 09/25
+        '../../../../Doc/Docs/Extratos/extrato_072025_250905_170222.txt',  # 07/25 a 09/25
         '../../../../Doc/Docs/Extratos/extrato_062025_250815_123724.txt',  # 06/25 a 08/25
-        '../../../../Doc/Docs/Extratos/extrato_012025_250811_181326.txt',  # 12/24 a 08/25
-        '../../../../Doc/Docs/Extratos/extrato_072024_250326_201254.txt',  # 06/04 a 03/25
         '../../../../Doc/Docs/Extratos/extrato_052025_250811_181400.txt',  # 05/25 a 08/25
+        '../../../../Doc/Docs/Extratos/extrato_072024_250326_201254.txt',  # 06/04 a 03/25
+        '../../../../Doc/Docs/Extratos/extrato_012025_250530_222908.txt',  # 01/25 a 05/25
+        '../../../../Doc/Docs/Extratos/extrato_012025_250811_181326.txt',  # 12/24 a 08/25
+        '../../../../Doc/Docs/Extratos/extrato_xxxxx.txt',                 # 12/24 a 05/25
         '../../../../Doc/Docs/Extratos/extrato_112023.txt',                # 11/23 a 02/24 
         '../../../../Doc/Docs/Extratos/extrato_0112023_banco_extrato.txt', # 11/23 a 02/24        
-        '../../../../Doc/Docs/Extratos/extrato_xxxxx.txt',                 # 12/24 a 05/25
-        '../../../../Doc/Docs/Extratos/extrato_012025_250530_222908.txt',  # 01/25 a 05/25
+        #'../../../../Doc/Docs/Extratos/extrato_2012_ContaCorrente2.txt'    # 10/12    
+        #'../../../../Doc/Docs/Extratos/extrato_2012_ContaCorrente.txt',    # 09/12    
     ]
-
-
-_file_paths = [    
-        '../../../../Doc/Docs/Extratos/extrato_072025_250921_091826.txt',
-        '../../../../Doc/Docs/Extratos/extrato_072025_250905_170222.txt',
-        '../../../../Doc/Docs/Extratos/extrato_012025_250811_181326.txt',
-        '../../../../Doc/Docs/Extratos/extrato_072024_250326_201254.txt',
-        '../../../../Doc/Docs/Extratos/extrato_052025_250811_181400.txt',
-        '../../../../Doc/Docs/Extratos/extrato_112023.txt',
-        '../../../../Doc/Docs/Extratos/extrato_xxxxx.txt',
-        '../../../../Doc/Docs/Extratos/extrato_012025_250530_222908.txt'
-    ]
-    
