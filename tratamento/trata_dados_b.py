@@ -54,16 +54,19 @@ def categorize_transactions(df, categorization_rules):
     # Converte o valor para float, substituindo a vírgula por ponto
     df['Valor_num'] = df['Valor'].str.replace(',', '.').astype(float)
     
+    # Cria uma cópia para evitar o SettingWithCopyWarning
+    df_categorized = df.copy()
+    
     for category, rules in categorization_rules.items():
         for rule in rules:
             
             # --- Inicia a máscara de categorização ---
-            combined_mask = pd.Series([True] * len(df))
+            combined_mask = pd.Series([True] * len(df_categorized))
 
             # Se o item da lista for uma string, é uma regra simples
             if isinstance(rule, str):
                 descricao_pattern = rule
-            
+                
             # Se o item da lista for um dicionário, é uma regra complexa
             elif isinstance(rule, dict):
                 descricao_pattern = rule.get('descricao')
@@ -73,47 +76,48 @@ def categorize_transactions(df, categorization_rules):
                 valor_entre = rule.get('valor_entre')
                 
                 if valor_exato is not None:
-                    valor_mask = df['Valor_num'] == valor_exato
+                    valor_mask = df_categorized['Valor_num'] == valor_exato
                     combined_mask = combined_mask & valor_mask
                 
                 if valor_maior_que is not None:
-                    valor_mask = df['Valor_num'] > valor_maior_que
+                    valor_mask = df_categorized['Valor_num'] > valor_maior_que
                     combined_mask = combined_mask & valor_mask
                 
                 if valor_menor_que is not None:
-                    valor_mask = df['Valor_num'] < valor_menor_que
+                    valor_mask = df_categorized['Valor_num'] < valor_menor_que
                     combined_mask = combined_mask & valor_mask
                 
                 if valor_entre is not None and len(valor_entre) == 2:
                     valor_min, valor_max = valor_entre
-                    valor_mask = (df['Valor_num'] >= valor_min) & (df['Valor_num'] <= valor_max)
+                    valor_mask = (df_categorized['Valor_num'] >= valor_min) & (df_categorized['Valor_num'] <= valor_max)
                     combined_mask = combined_mask & valor_mask
             
             # Se houver um padrão de descrição, aplica a máscara.
-            # Esta verificação é comum para regras simples e complexas.
             if descricao_pattern:
-                descricao_mask = df['Descricao'].str.contains(descricao_pattern, case=False, na=False)
+                descricao_mask = df_categorized['Descricao'].str.contains(descricao_pattern, case=False, na=False)
                 combined_mask = combined_mask & descricao_mask
 
             # Aplica a categoria APENAS se a categoria atual for 'Nao_Categorizado'.
             # Isso impede a sobrescrita.
-            df.loc[combined_mask & (df['Categoria'] == 'Nao_Categorizado'), 'Categoria'] = category
-
+            # O `loc` agora é usado em `df_categorized`
+            mask_to_apply = combined_mask & (df_categorized['Categoria'] == 'Nao_Categorizado')
+            df_categorized.loc[mask_to_apply, 'Categoria'] = category
+            
     # Identifica e coleta as descrições não categorizadas
-    uncategorized_descriptions = df[df['Categoria'] == 'Nao_Categorizado']['Descricao'].unique().tolist()
+    uncategorized_descriptions = df_categorized[df_categorized['Categoria'] == 'Nao_Categorizado']['Descricao'].unique().tolist()
     
-    return df, uncategorized_descriptions
+    return df_categorized, uncategorized_descriptions
 
 # --- Nova função para remover duplicatas e ordenar ---
 def clean_and_sort_dataframe(df):
     """
     Remove linhas duplicadas e ordena o DataFrame por data.
     """
-    # Remove duplicatas considerando as colunas de Data e Descricao.
-    df_cleaned = df.drop_duplicates(subset=['Data', 'Descricao'], keep='first')
+    # Create a new DataFrame using a deep copy
+    df_cleaned = df.drop_duplicates(subset=['Data', 'Descricao'], keep='first').copy()
     
-    # Converte a coluna 'Data' para o tipo datetime, que permite a ordenação correta.
-    df_cleaned['Data'] = pd.to_datetime(df_cleaned['Data'], format='%d/%m/%Y')
+    # Use .loc to safely modify the DataFrame
+    df_cleaned.loc[:, 'Data'] = pd.to_datetime(df_cleaned['Data'], format='%d/%m/%Y')
     
     # Ordena o DataFrame pela coluna 'Data' em ordem crescente.
     df_sorted = df_cleaned.sort_values(by='Data', ascending=False)
@@ -223,19 +227,18 @@ if __name__ == '__main__':
         else:
             print("\n--- Todas as descrições foram categorizadas com sucesso! ---")
         
-        final_df = df_filtrado_final.copy()
-        
+        final_df = df_filtrado_final.copy() # Good practice to work on a copy
+
         # --- Passo 5: Chamada da função de limpeza e ordenação ---
         print("--- 5. Removendo duplicatas e ordenando o DataFrame...")
         final_df = clean_and_sort_dataframe(final_df)
-        
-        # Remove a coluna de Descricao para ficar com o formato final
-        final_df = final_df.drop(columns=['Descricao'])
-        
-        # Renomeia as colunas para o padrão final
-        final_df.rename(columns={'Data': 'Data', 'Categoria': 'Categoria', 'Valor': 'Valor'}, inplace=True)
-        
-        # A coluna 'Data' já é do tipo datetime, então podemos formatá-la
+
+        # ... (other code)
+
+        # Convert 'Data' to datetime just to be safe before formatting
+        final_df['Data'] = pd.to_datetime(final_df['Data'], format='%d/%m/%Y', errors='coerce')
+
+        # A coluna 'Data' agora é do tipo datetime, então podemos formatá-la
         final_df['Data'] = final_df['Data'].dt.strftime('%d/%m/%Y')
 
         # Reordena as colunas para o padrão final: Data, Categoria, Valor

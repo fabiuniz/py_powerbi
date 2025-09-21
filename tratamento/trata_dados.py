@@ -1,6 +1,6 @@
 import pandas as pd
 import re
-from rules import categorization_rules
+from rules import categorization_rules, descricoes_para_remover, file_paths
 
 def preprocess_raw_statement(file_path):
     """
@@ -45,34 +45,78 @@ def parse_statement_lines(lines):
             
     return pd.DataFrame(data)
 
-def categorize_transactions(df, regex_rules):
+def categorize_transactions(df, categorization_rules):
     """
-    Categoriza as transações com base em um dicionário de regras de regex.
-    Retorna o DataFrame categorizado e uma lista de descrições não categorizadas.
+    Categoriza as transações com base em um dicionário de regras.
+    Aceita regras simples (regex string) e regras complexas (dict com descricao e valor).
     """
     df['Categoria'] = 'Nao_Categorizado'
+    # Converte o valor para float, substituindo a vírgula por ponto
+    df['Valor_num'] = df['Valor'].str.replace(',', '.').astype(float)
     
-    # Itera sobre as regras e aplica a categorização
-    for category, patterns in regex_rules.items():
-        for pattern in patterns:
-            # Use 'str.contains' para encontrar o padrão na coluna 'Descricao'
-            mask = df['Descricao'].str.contains(pattern, case=False, na=False)
-            df.loc[mask, 'Categoria'] = category
+    # Cria uma cópia para evitar o SettingWithCopyWarning
+    df_categorized = df.copy()
+    
+    for category, rules in categorization_rules.items():
+        for rule in rules:
+            
+            # --- Inicia a máscara de categorização ---
+            combined_mask = pd.Series([True] * len(df_categorized))
+
+            # Se o item da lista for uma string, é uma regra simples
+            if isinstance(rule, str):
+                descricao_pattern = rule
+                
+            # Se o item da lista for um dicionário, é uma regra complexa
+            elif isinstance(rule, dict):
+                descricao_pattern = rule.get('descricao')
+                valor_exato = rule.get('valor_exato')
+                valor_maior_que = rule.get('valor_maior_que')
+                valor_menor_que = rule.get('valor_menor_que')
+                valor_entre = rule.get('valor_entre')
+                
+                if valor_exato is not None:
+                    valor_mask = df_categorized['Valor_num'] == valor_exato
+                    combined_mask = combined_mask & valor_mask
+                
+                if valor_maior_que is not None:
+                    valor_mask = df_categorized['Valor_num'] > valor_maior_que
+                    combined_mask = combined_mask & valor_mask
+                
+                if valor_menor_que is not None:
+                    valor_mask = df_categorized['Valor_num'] < valor_menor_que
+                    combined_mask = combined_mask & valor_mask
+                
+                if valor_entre is not None and len(valor_entre) == 2:
+                    valor_min, valor_max = valor_entre
+                    valor_mask = (df_categorized['Valor_num'] >= valor_min) & (df_categorized['Valor_num'] <= valor_max)
+                    combined_mask = combined_mask & valor_mask
+            
+            # Se houver um padrão de descrição, aplica a máscara.
+            if descricao_pattern:
+                descricao_mask = df_categorized['Descricao'].str.contains(descricao_pattern, case=False, na=False)
+                combined_mask = combined_mask & descricao_mask
+
+            # Aplica a categoria APENAS se a categoria atual for 'Nao_Categorizado'.
+            # Isso impede a sobrescrita.
+            # O `loc` agora é usado em `df_categorized`
+            mask_to_apply = combined_mask & (df_categorized['Categoria'] == 'Nao_Categorizado')
+            df_categorized.loc[mask_to_apply, 'Categoria'] = category
             
     # Identifica e coleta as descrições não categorizadas
-    uncategorized_descriptions = df[df['Categoria'] == 'Nao_Categorizado']['Descricao'].unique().tolist()
+    uncategorized_descriptions = df_categorized[df_categorized['Categoria'] == 'Nao_Categorizado']['Descricao'].unique().tolist()
     
-    return df, uncategorized_descriptions
+    return df_categorized, uncategorized_descriptions
 
 # --- Nova função para remover duplicatas e ordenar ---
 def clean_and_sort_dataframe(df):
     """
     Remove linhas duplicadas e ordena o DataFrame por data.
     """
-    # Remove duplicatas considerando as colunas de Data e Descricao.
-    df_cleaned = df.drop_duplicates(subset=['Data', 'Descricao'], keep='first')
+    # Remove duplicatas e cria uma cópia explícita para evitar o SettingWithCopyWarning
+    df_cleaned = df.drop_duplicates(subset=['Data', 'Descricao'], keep='first').copy()
     
-    # Converte a coluna 'Data' para o tipo datetime, que permite a ordenação correta.
+    # Converte a coluna 'Data' para o tipo datetime.
     df_cleaned['Data'] = pd.to_datetime(df_cleaned['Data'], format='%d/%m/%Y')
     
     # Ordena o DataFrame pela coluna 'Data' em ordem crescente.
@@ -102,41 +146,7 @@ def process_full_statement(file_path, categorization_rules):
 
 # --- Bloco principal de execução ---
 if __name__ == '__main__':
-    categorization_rules = {
-        'MERCADO': [r'ATACADAO',r'MERCADINHO',r'PANIF',r'PADARIA',r'CARREFOUR', r'RSHOP BIG BOM', r'RSHOP MERCADO ', r'RSHOP MARCO', r'RSHOP MUFFATO', r'SUPERMERCADO', r'RSHOP-MERCADO'],
-        'FARMACIA': [r'DROGA',r'FARMACIA', r'DROGARIA'],
-        'SAQUE': [r'SAQUE', r'CXE'],
-        'RESTAURANTE': [r'DOGAO',r'Feijoada',r'PASTEL',r'Espeto',r'Bacio di',r'VIVENDA DO',r'FRANGO', r'Restaura', r'RSHOP-DOGAO DO', r'RSHOP-SANTA GULA', r'RSHOP-VIVENDA DO', r'RSHOP ESPETO', r'RESTAURANTE', r'PIZZARIA', r'RSHOP-ESPETO'],
-        'TELEFONE': [r'MOBILE PAG TIT BANC',r'TIM', r'VIVO', r'CLARO'],
-        'INTERNET': [r'INTERNET', r'NET', r'CLARO'],
-        'OUTROS': [r'EDUARDODIAS', r'MARIVANLIMA'],
-        'GASOLINA': [r'AUTOSUL', r'RSHOP AUTO POSTO', r'RSHOP-AUTO POSTO'],
-        'LUZ': [r'ELETROPAULO'],
-        'GAS': [r' GAS ',r'INT COMGAS'],
-        'ESTACIONAMENTO': [r'ESTAPAR',r'RSHOP-SP MARKET'],
-        'IGREJA': [r'ADS',r'SOCIEDADE B', r'ADSA'],
-        'HOTEL': [r'FOZ PLAZA',r'RSHOP PANORAMA '],
-        'BANCO': [r'SEGURO CARTAO'],
-        'SHOPPING': [r'CELLSHOP',r'SHOPPING',r'SP MARKET',r'LOJAS RENNE',r'RSHOP-RIACHUELO'],
-        'HOTFRUIT': [r'FRUTAO',r'CHACARA DO',r'Hortifruti'],
-        'AEROPORTO':[r'GRU '],
-        'PAPELARIA': [r'LAN HOUSE',r'KALUNGA'],
-        'ACOUGUE': [r'WEST BOI'],
-        'TRANSFERENCIAS' :[r' TRANSF '],
-        'MECANICO' :[r'PREMYER',r'CENTRO AUTO',r'CLIMATOA'],
-        'TARIFA':[r'ITAU']
-        
-    }
 
-    file_paths = [
-        '../../../../Doc/Docs/Extratos/extrato_012025_250811_181326.txt',
-        '../../../../Doc/Docs/Extratos/extrato_072024_250326_201254.txt',
-        '../../../../Doc/Docs/Extratos/extrato_052025_250811_181400.txt',
-        '../../../../Doc/Docs/Extratos/extrato_112023.txt',
-        '../../../../Doc/Docs/Extratos/banco_extrato.txt',
-        '../../../../Doc/Docs/Extratos/extrato_012025_250530_222908.txt'
-    ]
-    
     all_dataframes = []
     
     # Itera sobre a lista de arquivos e processa cada um, acumulando os DataFrames.

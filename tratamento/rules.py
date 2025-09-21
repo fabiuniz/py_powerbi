@@ -1,10 +1,9 @@
 # rules.py
 categorization_rules = {
-        'AURUM': [r'AURUM'],
         'ACOUGUE': [r'CASA DE CAR',r'WEST BOI'],
         'AEROPORTO':[r'GRU '],
-        'BANCO': [r'SEGURO CARTAO'],
-        'BELEZA' :[r'TAIYANG'],
+        'BANCO': [r'RSHOP PISTA',r'SEGURO CARTAO'],
+        'BELEZA' :[r'ANGELA PE',r'TAIYANG'],
         'COSTURA' :[r'TIAGO MAQUI',r'FIVELAS',r'TECIDOS'],
         'CONDOMINIO': [
             {'descricao': r'PAG BOLETO|MOBILEPAG|CONDOMINIO|RESIDENCIAL', 'valor_entre': [-600.00, -380.00]},            
@@ -12,7 +11,7 @@ categorization_rules = {
         'ESTACIONAMENTO': [r'Estacion',r'ESTAC ',r'PARK ',r'ESTAPAR',r'RSHOP-SP MARKET'],
         'FARMACIA': [r'GOYA PERFU',r'USEMAISFARM',r'DROGA',r'FARMACIA', r'DROGARIA',r'FARMA'],
         'GAS': [r' GAS ',r'INT COMGAS',r'COMGAS'],
-        'GASOLINA': [r'PETROL ',r'AUTOSUL', r'RSHOP AUTO POSTO', r'RSHOP-AUTO POSTO',r'N S FATIMA'],
+        'GASOLINA': [r'AURUM',r'PETROL ',r'AUTOSUL', r'RSHOP AUTO POSTO', r'RSHOP-AUTO POSTO',r'N S FATIMA'],
         'HOTFRUIT': [r'FRUTAO',r'CHACARA DO',r'Hortifruti',r'HORTIFRU'],
         'IGREJA': [r'CONADIBE',r'ADS',r'SOCIEDADE B', r'ADSA'],
         'IMPRESORA':[r'PONTODOSCAR'],
@@ -48,16 +47,31 @@ descricoes_para_remover = [
         'outra_descricao_qualquer'
     ]
 
-# Os arquivos para extrair informações
+# Os arquivos para extrair informações     # pdftotext.exe
 file_paths = [
         #'../../../../Doc/Docs/Extratos/extrato_2012_ContaCorrente.txt',    # 09/12    
         #'../../../../Doc/Docs/Extratos/extrato_2012_ContaCorrente2.txt'    # 10/12    
+        '../../../../Doc/Docs/Extratos/extrato_072025_250921_091826.txt',
+        '../../../../Doc/Docs/Extratos/extrato_072025_250905_170222.txt',
+        '../../../../Doc/Docs/Extratos/extrato_062025_250815_123724.txt',  # 06/25 a 08/25
+        '../../../../Doc/Docs/Extratos/extrato_012025_250811_181326.txt',  # 12/24 a 08/25
+        '../../../../Doc/Docs/Extratos/extrato_072024_250326_201254.txt',  # 06/04 a 03/25
+        '../../../../Doc/Docs/Extratos/extrato_052025_250811_181400.txt',  # 05/25 a 08/25
         '../../../../Doc/Docs/Extratos/extrato_112023.txt',                # 11/23 a 02/24 
         '../../../../Doc/Docs/Extratos/extrato_0112023_banco_extrato.txt', # 11/23 a 02/24        
         '../../../../Doc/Docs/Extratos/extrato_xxxxx.txt',                 # 12/24 a 05/25
         '../../../../Doc/Docs/Extratos/extrato_012025_250530_222908.txt',  # 01/25 a 05/25
-        '../../../../Doc/Docs/Extratos/extrato_072024_250326_201254.txt',  # 06/04 a 03/25
-        '../../../../Doc/Docs/Extratos/extrato_012025_250811_181326.txt',  # 12/24 a 08/25
-        '../../../../Doc/Docs/Extratos/extrato_052025_250811_181400.txt',  # 05/25 a 08/25
-        '../../../../Doc/Docs/Extratos/extrato_062025_250815_123724.txt',  # 06/25 a 08/25
     ]
+
+
+_file_paths = [    
+        '../../../../Doc/Docs/Extratos/extrato_072025_250921_091826.txt',
+        '../../../../Doc/Docs/Extratos/extrato_072025_250905_170222.txt',
+        '../../../../Doc/Docs/Extratos/extrato_012025_250811_181326.txt',
+        '../../../../Doc/Docs/Extratos/extrato_072024_250326_201254.txt',
+        '../../../../Doc/Docs/Extratos/extrato_052025_250811_181400.txt',
+        '../../../../Doc/Docs/Extratos/extrato_112023.txt',
+        '../../../../Doc/Docs/Extratos/extrato_xxxxx.txt',
+        '../../../../Doc/Docs/Extratos/extrato_012025_250530_222908.txt'
+    ]
+    
