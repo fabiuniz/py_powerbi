@@ -950,7 +950,7 @@ def get_relatorio_despesas_por_mes():
                 sort_action="native",
                 filter_action="native",
                 page_action="native",
-                page_size=30,
+                page_size=31,
                 export_format="csv"
             ), className="dashboard-section"
         )

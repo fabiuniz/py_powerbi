@@ -8,6 +8,7 @@ categorization_rules = {
         'CONDOMINIO': [
             {'descricao': r'PAG BOLETO|MOBILEPAG|CONDOMINIO|RESIDENCIAL', 'valor_entre': [-600.00, -380.00]},            
         ],
+        'DENTISTA': [r'Dentista'],
         'ESTACIONAMENTO': [r'Estacion',r'ESTAC ',r'PARK ',r'ESTAPAR',r'RSHOP-SP MARKET'],
         'FARMACIA': [r'GOYA PERFU',r'USEMAISFARM',r'DROGA',r'FARMACIA', r'DROGARIA',r'FARMA'],
         'GAS': [r' GAS ',r'INT COMGAS',r'COMGAS'],
@@ -30,7 +31,7 @@ categorization_rules = {
         'TARIFA':[r'TARIFA TRAN',r'ITAU'],
         'TELEFONE': [
             r'INT PRE-PAGO',
-            {'descricao': r'PAG BOLETO|MOBILEPAG|MOBILE PAG', 'valor_entre': [-280.00, -40.00]},
+            {'descricao': r'PAG BOLETO|MOBILEPAG|MOBILE PAG', 'valor_entre': [-170.00, -40.00]},
             r'VIVO',
             r'CLARO'            
         ],
