@@ -164,43 +164,65 @@ if __name__ == '__main__':
         print("--- 4. Categorizando todas as transações...")
         df_categorized, uncategorized_list = categorize_transactions(df_combined.copy(), categorization_rules)
 
-        print("--- 4. Categorizando todas as transações...")
-        df_categorized, uncategorized_list = categorize_transactions(df_combined.copy(), categorization_rules)
-
-        #if uncategorized_list:
-        #    print("\n--- ATENÇÃO: Descrições não categorizadas encontradas! ---")
-        #    print("Por favor, adicione regras para as seguintes descrições e execute novamente:")
-        #    for desc in uncategorized_list:
-        #        print(f"- {desc}")
-        #    print("-" * 50)            
-        #    final_df = df_categorized[df_categorized['Categoria'] != 'Nao_Categorizado'].copy()
-        #else:
-        #    print("\n--- Todas as descrições foram categorizadas com sucesso! ---")
-        #    final_df = df_categorized.copy()
-
         if uncategorized_list:
             print("\n--- ATENÇÃO: Descrições não categorizadas encontradas! ---")
             print("As seguintes descrições serão salvas com a categoria 'Nao_Categorizado':")
             for desc in uncategorized_list:
                 print(f"- {desc}")
             print("-" * 50)
-            #Descomentar para Adicionar filtro eliminando Nao_Categorizado e .... logo abaixo ....
-            #final_df = df_categorized[df_categorized['Categoria'] != 'Nao_Categorizado'].copy()
         else:
             print("\n--- Todas as descrições foram categorizadas com sucesso! ---")
         
         # O DataFrame 'df_categorized' já contém todas as transações,
         # incluindo as que foram marcadas como 'Nao_Categorizado'.
-        # Não é mais necessário filtrar, então podemos atribuir diretamente.
-        #E Identrar essa linha para Adicionar filtro eliminando Nao_Categorizado
         final_df = df_categorized.copy()
 
         # --- Passo 5: Chamada da função de limpeza e ordenação ---
         print("--- 5. Removendo duplicatas e ordenando o DataFrame...")
         final_df = clean_and_sort_dataframe(final_df)
         
-        # Remove a coluna de Descricao para ficar com o formato final
-        final_df = final_df.drop(columns=['Descricao'])
+        
+        # --- NOVO BLOCO: JSON EXPORT ---
+        print("--- 5a. Formatando e exportando JSON...")
+        # Cria uma cópia do DataFrame ANTES de remover colunas e reformatar para CSV.
+        df_json_export = final_df.copy()
+        
+        # 1. Adiciona as colunas extras e formata/renomeia conforme o JSON desejado
+        df_json_export['id'] = df_json_export.reset_index().index + 1
+        df_json_export['timestamp'] = (df_json_export['Data'].astype('int64') // 10**6) 
+        df_json_export['date'] = df_json_export['Data'].dt.strftime('%Y-%m-%d')
+        df_json_export['payment_method'] = 'Não Informado' # Valor fixo
+        df_json_export['notes'] = '' # Valor fixo
+
+        # 2. Renomeia e seleciona colunas
+        df_json_export.rename(columns={
+            'Descricao': 'description',
+            'Valor_num': 'value', # Usa a coluna numérica
+            'Categoria': 'category'
+        }, inplace=True)
+        
+        # Seleciona e reordena as colunas do JSON no formato desejado
+        df_json_export = df_json_export[['id', 'timestamp', 'description', 'value', 'payment_method', 'date', 'notes', 'category']]
+        
+        # 3. Agrupa por 'category' e transforma em um dicionário de listas para o JSON
+        # O to_json(orient='records') converte cada sub-dataframe em uma lista de objetos
+        json_grouped = df_json_export.groupby('category').apply(lambda x: x.to_dict('records')).to_dict()
+        
+        # Exportação JSON
+        output_json_path = '../csv/despesas_processadas.json' 
+        with open(output_json_path, 'w', encoding='utf-8') as f:
+            # Escreve o dicionário no arquivo, usando indentação para legibilidade
+            import json
+            json.dump(json_grouped, f, indent=4, ensure_ascii=False)
+            
+        print(f"Cópia do arquivo salva em: {output_json_path}")
+        # --- FIM DO BLOCO JSON EXPORT ---
+        
+        
+        # Continua a rotina de CSV original:
+        
+        # Remove as colunas desnecessárias para o CSV final (mantendo o Valor original com vírgula)
+        final_df = final_df.drop(columns=['Descricao', 'Valor_num']) 
         
         # Renomeia as colunas para o padrão final
         final_df.rename(columns={'Data': 'Data', 'Categoria': 'Categoria', 'Valor': 'Valor'}, inplace=True)
@@ -218,7 +240,13 @@ if __name__ == '__main__':
         final_df.to_csv(output_csv_path, sep=';', index=False)
         
         print(f"\nDados processados e salvos em: {output_csv_path}")
-        print("\nPrimeiras 5 linhas do arquivo gerado:")
+        print("\nPrimeiras 5 linhas do arquivo CSV gerado:")
         print(final_df.head())
+        print("\nPrimeira linha do arquivo JSON gerado (Amostra):")
+        
+        # Imprime uma amostra do JSON agrupado
+        import json
+        sample_output = {k: v[:1] for k, v in json_grouped.items()} # Pega o primeiro item de cada categoria
+        print(json.dumps(sample_output, indent=4, ensure_ascii=False))
     else:
         print("\nNenhum dado válido para processar.")
