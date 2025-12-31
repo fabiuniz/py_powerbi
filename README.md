@@ -2,6 +2,7 @@
   Tags: DadosIA
   Label: 💥 Integração de Python com Power BI.
   Description:⭐ Conteúdo ou curso sobre integração de Python com Power BI para análise de dados pedidos, produto e despesas.
+  technical_requirement: Python, Dash, Plotly, pandas, gunicorn, Docker, Docker Compose, CSV, Power BI, Git
   path_hook: hookfigma.hook1
 -->
 

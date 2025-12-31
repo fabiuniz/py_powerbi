@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: powerbi-pod
+  labels:
+    app: dashboard
+spec:
+  containers:
+  - name: dashboard-container
+    image: powerbi_dashboard_1
+    imagePullPolicy: Never # Usa a imagem local que carregamos no minikube

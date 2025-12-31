@@ -3,3 +3,5 @@
 #ufw allow 8050/tcp
 docker-compose up --build -d
 #docker-compose logs dashboard
+#pip install --upgrade -r requirements.txt
+#pip freeze > requirements_novo.txt

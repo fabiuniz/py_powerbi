@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: powerbi-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: powerbi 
+  template:
+    metadata:
+      labels:
+        app: powerbi
+    spec:
+      containers:
+      - name: dashboard
+        image: powerbi_dashboard_1:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8050

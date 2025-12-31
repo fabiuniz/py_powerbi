@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: powerbi-rs
+spec:
+  replicas: 3 # Aqui definimos a alta disponibilidade
+  selector:
+    matchLabels:
+      app: dashboard
+  template:
+    metadata:
+      labels:
+        app: dashboard
+    spec:
+      containers:
+      - name: dashboard-container
+        image: powerbi_dashboard_1
+        imagePullPolicy: Never

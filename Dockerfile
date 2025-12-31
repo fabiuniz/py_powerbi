@@ -5,10 +5,11 @@ WORKDIR /app
 
 # Copia o arquivo de requisitos e instala as dependências
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt --timeout 600
 
 # Copia o código da aplicação para o diretório de trabalho
 COPY app.py .
+COPY csv/ ./csv/
 
 # Expõe a porta que a aplicação Dash irá usar
 EXPOSE 8050
