@@ -32,8 +32,10 @@ def load_financial_data(file_path='csv/relatorio.csv'):
         ]
         df['Data'] = pd.to_datetime(df['Data'], format='%d/%m/%Y', errors='coerce')
         df['Tipo'] = df['Tipo'].str.strip()  # Remove espaços em branco
-        df['Valor'] = df['Valor'].astype(str).str.replace(' ', '', regex=False)
-        df['Valor'] = df['Valor'].str.replace('R$', '', regex=False)
+        # Removendo espaços, R$ e tratando separadores
+        df['Valor'] = df['Valor'].astype(str).str.replace('R$', '', regex=False).str.strip()
+        df['Valor'] = df['Valor'].str.replace(' ', '', regex=False)
+        # A vacina: Remove ponto de milhar antes de trocar a vírgula
         df['Valor'] = df['Valor'].str.replace('.', '', regex=False)
         df['Valor'] = df['Valor'].str.replace(',', '.', regex=False)
         df['Valor'] = pd.to_numeric(df['Valor'], errors='coerce')
@@ -87,6 +89,7 @@ def load_sales_data(file_path='csv/pedidos.csv'):
         df['Data'] = pd.to_datetime(df['Data'], format='%d/%m/%Y', errors='coerce')
         df['Data_Entrega'] = pd.to_datetime(df['Data_Entrega'], format='%d/%m/%Y', errors='coerce')
         df['Quantidade'] = pd.to_numeric(df['Quantidade'], errors='coerce')
+        df['Total'] = df['Total'].astype(str).str.replace('.', '', regex=False).str.replace(',', '.', regex=False)
         df['Total'] = pd.to_numeric(df['Total'], errors='coerce')
         logger.info(f"Dados de vendas carregados de {file_path} com {len(df)} linhas")
         return df
@@ -584,12 +587,24 @@ def layout_despesas_pessoais():
 
             # Converter e limpar
             df['Data'] = pd.to_datetime(df['Data'], format='%d/%m/%Y', errors='coerce')
-            df['Valor'] = df['Valor'].astype(str).str.replace(',', '.', regex=False)
-            df['Valor'] = pd.to_numeric(df['Valor'], errors='coerce')
-            df['Valor'] = df['Valor'].apply(lambda x: abs(x) if pd.notnull(x) and x < 0 else x)
+            # 1. Converte para string e limpa espaços extras
+            df['Valor'] = df['Valor'].astype(str).str.strip()
 
-            # Remover linhas com valores nulos após conversão
-            df = df.dropna(subset=['Data', 'Categoria', 'Valor'], how='any')
+            # 2. LIMPEZA TOTAL (Remove R$, espaços e o ponto de milhar ANTES de trocar a vírgula)
+            df['Valor'] = df['Valor'].str.replace('R$', '', regex=False)
+            df['Valor'] = df['Valor'].str.replace('.', '', regex=False) # Remove o ponto (1.345 -> 1345)
+            df['Valor'] = df['Valor'].str.replace(',', '.', regex=False) # Troca vírgula por ponto (1345,83 -> 1345.83)
+
+            # 3. Converte para número e garante que não seja nulo
+            df['Valor'] = pd.to_numeric(df['Valor'], errors='coerce')
+            # Isso remove depósitos, estornos ou saldos positivos do gráfico de despesas
+            df = df[df['Valor'] < 0].copy()
+            
+            # 4. Transforma negativos em positivos (se houver)
+            df['Valor'] = df['Valor'].abs()
+
+            # 5. Só agora remove o que for realmente inválido
+            df = df.dropna(subset=['Valor'])
             logger.info(f"Linhas após limpeza final: {len(df)}")
             logger.info(f"Primeiras linhas de df_despesas_pessoais: \n{df.head().to_string()}")
 
@@ -833,9 +848,21 @@ def get_relatorio_despesas_por_mes():
             parse_dates=['Data'],
             date_format='%d/%m/%Y'
         )
-        df_despesas_pessoais['Valor'] = df_despesas_pessoais['Valor'].astype(str).str.replace(',', '.', regex=False)
+# 1. Garante que é string e limpa espaços
+        df_despesas_pessoais['Valor'] = df_despesas_pessoais['Valor'].astype(str).str.strip()
+        # 2. REMOVE PONTO DE MILHAR E TROCA VÍRGULA POR PONTO
+        # Transforma "-1.234,72" -> "-1234.72"
+        df_despesas_pessoais['Valor'] = (
+            df_despesas_pessoais['Valor']
+            .str.replace('.', '', regex=False)
+            .str.replace(',', '.', regex=False)
+        )
+        # 3. Converte para número e trata sinais
         df_despesas_pessoais['Valor'] = pd.to_numeric(df_despesas_pessoais['Valor'], errors='coerce')
+        # Filtra para manter apenas o que é menor que zero (Saídas)
+        df_despesas_pessoais = df_despesas_pessoais[df_despesas_pessoais['Valor'] < 0].copy()
         df_despesas_pessoais['Valor'] = df_despesas_pessoais['Valor'].abs()
+        # 4. Remove nulos (agora as linhas de milhar não serão removidas!)
         df_despesas_pessoais.dropna(subset=['Data', 'Categoria', 'Valor'], inplace=True)
     except FileNotFoundError:
         return html.Div("Erro: Arquivo csv/despesa.csv não encontrado.")
@@ -1082,3 +1109,5 @@ def display_page(pathname):
 # --- 8. Execução da Aplicação ---
 if __name__ == '__main__':
     app.run_server(debug=True, host='0.0.0.0', port=8050)
+
+    

@@ -30,7 +30,7 @@ def parse_statement_lines(lines):
     # Expressão regular para capturar Data, Descrição e Valor
     # A descrição é um grupo não-guloso (.*?) para evitar capturar a data ou o valor
     # O valor pode ser negativo e ter vírgula
-    pattern = re.compile(r'(\d{2}/\d{2}/\d{4})\s+(.*?)\s+(-?\d+,\d{2})')
+    pattern = re.compile(r'(\d{2}/\d{2}/\d{4})\s+(.*?)\s+(-?[\d.]*,\d{2})')
     
     for line in lines:
         match = pattern.search(line)
@@ -52,7 +52,22 @@ def categorize_transactions(df, categorization_rules):
     """
     df['Categoria'] = 'Nao_Categorizado'
     # Converte o valor para float, substituindo a vírgula por ponto
-    df['Valor_num'] = df['Valor'].str.replace(',', '.').astype(float)
+    # Primeiro remove o ponto de milhar, depois troca a vírgula por ponto decimal
+    df['Valor_num'] = (
+        df['Valor']
+        .str.replace('.', '', regex=False)
+        .str.replace(',', '.', regex=False)
+        .astype(float)
+    )
+    # Isso remove depósitos, transferências recebidas e saldos positivos
+    # 1. Filtra para manter apenas o que é saída
+    df = df[df['Valor_num'] < 0].copy()
+
+    # 2. CONVERTE PARA POSITIVO PARA FACILITAR A SOMA NOS RELATÓRIOS
+    df['Valor_num'] = df['Valor_num'].abs()
+    
+    # Se você quiser que a coluna 'Valor' (texto com vírgula) também fique positiva:
+    df['Valor'] = df['Valor'].str.replace('-', '', regex=False)
     
     # Cria uma cópia para evitar o SettingWithCopyWarning
     df_categorized = df.copy()
@@ -250,3 +265,58 @@ if __name__ == '__main__':
         print(json.dumps(sample_output, indent=4, ensure_ascii=False))
     else:
         print("\nNenhum dado válido para processar.")
+
+# --- Bloco principal de execução ---
+if __name__ == '__main__':
+
+    all_dataframes = []
+    
+    for path in file_paths:
+        df_raw, _ = process_full_statement(path, categorization_rules)
+        if df_raw is not None and not df_raw.empty:
+            all_dataframes.append(df_raw)
+    
+    if all_dataframes:
+        # ... (seu código de união e categorização anterior) ...
+        df_combined = pd.concat(all_dataframes, ignore_index=True)
+        df_categorized, uncategorized_list = categorize_transactions(df_combined.copy(), categorization_rules)
+
+        # 1. Garante que a data seja reconhecida para extrair o ano
+        df_categorized['Data'] = pd.to_datetime(df_categorized['Data'], format='%d/%m/%Y')
+        df_categorized['Ano'] = df_categorized['Data'].dt.year
+
+        # 1. Primeiro limpamos os dados (Duplicatas e Datas)
+        final_df = clean_and_sort_dataframe(df_categorized)
+        
+        # 2. Garantimos que o Ano seja extraído corretamente
+        final_df['Ano'] = final_df['Data'].dt.year
+        
+        # 3. Calculamos o resumo ANTES de imprimir o total
+        resumo_anual = final_df.groupby('Ano')['Valor_num'].sum()
+        total_real = resumo_anual.sum() # Soma apenas o que está nos anos acima
+
+        print("\n" + "="*40)
+        print("CONCILIAÇÃO FINANCEIRA FINAL")
+        print("="*40)
+
+        for ano, soma in resumo_anual.items():
+            # Formatação para o padrão brasileiro R$ 0.000,00
+            soma_formatada = f"R$ {soma:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+            print(f"ANO {ano}: {soma_formatada}")
+        
+        print("-" * 40)
+        total_formatado = f"R$ {total_real:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        print(f"SOMA TOTAL REAL: {total_formatado}")
+        print("="*40 + "\n")
+
+        # Segue para a exportação...
+        final_df = clean_and_sort_dataframe(df_categorized)
+        # ...
+        
+        # Exportação JSON e CSV seguem aqui como no seu código...
+        # ... (seu código de exportação JSON) ...
+        # ... (seu código de exportação CSV) ...
+
+        print(f"\n✅ Processamento concluído com sucesso!")
+    else:
+        print("\n❌ Nenhum dado válido para processar.")
