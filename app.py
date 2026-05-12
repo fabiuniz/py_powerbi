@@ -755,7 +755,9 @@ def layout_despesas_pessoais():
         )
     )
     fig_picos_diario.update_traces(
-        hovertemplate='Data: %{x|%d/%m/%Y}<br>Valor: R$ %{y:,.2f}<br>Categoria: %{customdata}'
+        hovertemplate="<b>Data:</b> %{x|%d/%m/%Y}<br>" +
+            "<b>Valor:</b> R$ %{y:,.2f}<br>" +
+            "<b>Categoria:</b> %{customdata[0]}"
     )
 
     # --- Gráfico 6: Gasto Mensal por Categoria (Linhas) ---
@@ -900,22 +902,7 @@ def get_relatorio_despesas_por_mes():
 
     # Organizar a ordem das colunas para combinar com sua query
     colunas_ordenadas = ['Ano', 'Categoria'] + list(nomes_meses.values()) + ['Total']
-    df_relatorio_mensal = df_relatorio_mensal[colunas_ordenadas]
-
-    # --- NOVO CÓDIGO AQUI: ADICIONAR LINHA DE TOTAIS ---
-    # Calcular a linha de totais somando cada coluna relevante
-    totais_por_mes = df_relatorio_mensal[list(nomes_meses.values()) + ['Total']].sum(numeric_only=True)
-
-    # Criar um DataFrame de uma linha para os totais
-    df_totais = pd.DataFrame([totais_por_mes], columns=totais_por_mes.index)
-
-    # Adicionar as colunas 'Ano' e 'Categoria' com valores de placeholder
-    df_totais['Ano'] = 'Total'
-    df_totais['Categoria'] = 'Total Geral'
-
-    # Juntar o DataFrame original com a nova linha de totais
-    df_relatorio_mensal = pd.concat([df_relatorio_mensal, df_totais], ignore_index=True)
-    # --- FIM DO NOVO CÓDIGO ---
+    df_relatorio_mensal = df_relatorio_mensal[colunas_ordenadas]    
 
     # Criar um gráfico de barras para o relatório mensal, se desejado
     fig_relatorio_barras = px.bar(
@@ -960,27 +947,40 @@ def get_relatorio_despesas_por_mes():
 
     return html.Div([
         html.H2("Relatório de Despesas Mensais por Categoria", className="text-2xl font-bold mb-4 text-gray-800"),
-        dcc.Graph(figure=fig_relatorio_barras, className="dashboard-section"),
-        html.Div(
+        dcc.Graph(figure=fig_relatorio_barras, className="dashboard-section"),    
+        # CONTAINER COM SCROLL ÚNICO
+        html.Div(className="dashboard-section", style={'overflowX': 'auto', 'width': '100%'}, children=[
+            # 1. Tabela de Dados
             dash_table.DataTable(
                 id='table-relatorio-mensal',
                 columns=columns,
                 data=df_relatorio_mensal.to_dict('records'),
-                style_table={'overflowX': 'auto', 'margin': '20px 0'},
+                export_format="csv",
+                filter_action="native",
+                sort_action="native",
+                page_size=100, # Aumentado para o total não ir para a página 2
+                style_table={'minWidth': '100%'},
                 style_header={'backgroundColor': '#f8f9fa', 'fontWeight': 'bold'},
                 style_cell={
-                    'minWidth': '70px',
-                    'width': '90px',
-                    'maxWidth': '110px',
-                    'whiteSpace': 'normal'
+                    'minWidth': '100px',
+                    'width': '100px',
+                    'maxWidth': '100px',
+                    'padding': '10px'
                 },
-                sort_action="native",
-                filter_action="native",
-                page_action="native",
-                page_size=31,
-                export_format="csv"
-            ), className="dashboard-section"
-        )
+            ),
+            # 2. Tabela de Total (Respeita o Filtro e nunca some)
+            dash_table.DataTable(
+                id='table-total-footer',
+                columns=columns,
+                data=[], # Preenchido pelo callback
+                style_table={'minWidth': '100%', 'marginTop': '-1px'},
+                style_header={'display': 'none'}, # Esconde o cabeçalho
+                style_cell={
+                    'minWidth': '100px', 'width': '100px', 'maxWidth': '100px',
+                    'fontWeight': 'bold', 'backgroundColor': '#f1f3f5'
+                },
+            )
+        ])
     ])
 
 def layout_geral():
@@ -1084,6 +1084,30 @@ app.layout = html.Div([
     ]),
     html.Div(id='page-content', className="content")
 ])
+
+@callback(
+    Output('table-total-footer', 'data'),
+    Input('table-relatorio-mensal', 'derived_virtual_data')
+)
+def atualizar_rodape_dinamico(rows):
+    if rows is None:
+        return []    
+    df_temp = pd.DataFrame(rows)    
+    if df_temp.empty:
+        return []
+    # Lista de colunas para somar
+    nomes_meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro', 'Total']    
+    # Criar dicionário de totais
+    linha_total = {}
+    for col in df_temp.columns:
+        if col in nomes_meses:
+            linha_total[col] = df_temp[col].sum()
+        else:
+            linha_total[col] = "" # Limpa colunas que não são somáveis            
+    linha_total['Ano'] = 'Total'
+    linha_total['Categoria'] = 'TOTAL FILTRADO'    
+    return [linha_total]
 
 # Callback para navegação entre páginas
 @callback(

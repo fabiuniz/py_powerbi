@@ -81,3 +81,10 @@ echo -e "${WHITE}      $IP_WSL vmlinuxd${NC}"
 # --- 5. PORT FORWARD ---
 echo -e "${BLUE}📡 Iniciando Port-Forward (mantenha este terminal aberto)...${NC}"
 kubectl port-forward svc/powerbi-service 8888:8050 --address 0.0.0.0
+
+#kubectl create namespace analise-dados --dry-run=client -o yaml | kubectl apply -f -
+#kubectl cluster-info
+#minikube delete --all --purge
+#docker ps -a  # Veja se há containers do minikube
+#docker stop $(docker ps -q) # Para tudo
+#docker rm $(docker ps -a -q) # Remove tudo

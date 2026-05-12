@@ -1,6 +1,11 @@
 import pandas as pd
 import re
 from rules import categorization_rules, descricoes_para_remover, file_paths
+import sys
+import io
+
+if sys.stdout.encoding != 'utf-8':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 def preprocess_raw_statement(file_path):
     """
@@ -64,10 +69,10 @@ def categorize_transactions(df, categorization_rules):
     df = df[df['Valor_num'] < 0].copy()
 
     # 2. CONVERTE PARA POSITIVO PARA FACILITAR A SOMA NOS RELATÓRIOS
-    df['Valor_num'] = df['Valor_num'].abs()
+    df['Valor_num'] = -df['Valor_num'].abs()
     
     # Se você quiser que a coluna 'Valor' (texto com vírgula) também fique positiva:
-    df['Valor'] = df['Valor'].str.replace('-', '', regex=False)
+    df['Valor'] = df['Valor'].apply(lambda x: x if x.startswith('-') else '-' + x)
     
     # Cria uma cópia para evitar o SettingWithCopyWarning
     df_categorized = df.copy()

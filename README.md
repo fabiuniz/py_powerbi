@@ -1,12 +1,12 @@
 <!-- 
   Tags: DadosIA
   Label: 💥 Integração de Python com Power BI.
-  Description:⭐ Conteúdo ou curso sobre integração de Python com Power BI para análise de dados pedidos, produto e despesas.
+  Description:🌍 Conteúdo ou curso sobre integração de Python com Power BI para análise de dados pedidos, produto e despesas.
   technical_requirement: Python, Dash, Plotly, pandas, gunicorn, Docker, Docker Compose, CSV, Power BI, Git
   path_hook: hookfigma.hook1
 -->
 
-# 📊 Dashboard Empresarial - Projeto Power BI
+# 📊 Dashboard Empresarial - Projeto Power BI Data Driven
 
 ## 🌟 Visão Geral
 Este projeto implementa um **Dashboard Geral da Empresa** utilizando Python, Dash e Plotly, com integração via Docker 🐳. O objetivo é fornecer uma visão consolidada e interativa das áreas financeira, logística e de vendas, conectando três dashboards especializados que atendem aos casos de uso descritos em `case_aula1.txt`, `case_aula2.txt` e `case_aula3.txt`. Um dashboard adicional para despesas da empresa e outro para despesas pessoais do gestor foram incluídos para análises específicas. Os dados são carregados de arquivos CSV, processados e visualizados em gráficos interativos para suportar a tomada de decisão estratégica 🚀.
@@ -24,6 +24,16 @@ Este projeto implementa um **Dashboard Geral da Empresa** utilizando Python, Das
   - `Bandeiras Países.csv`, `cadastro de exeções.csv`, `Produtos.csv`: Arquivos adicionais para suporte.
   - `despesas.csv`: Dados de despesas pessoais do gestor e despesas da empresa.
 - **docs/** 📝: Documentação dos casos de uso (business cases) para cada dashboard.
+
+## 📈 Inteligência de Negócio
+O ecossistema responde a seis frentes estratégicas:
+- Geral: Visão executiva consolidada (Dashboard Geral).
+- Financeiro: Controle de fluxo de caixa e saldo acumulado.
+- Logística: Torre de controle de importações e análise de OTD por modal.
+- Vendas: Performance da AgroFruits com análise de sazonalidade (150k registros).
+- Despesas Empresariais: Auditoria de custos operacionais por setor.
+- Gestão Pessoal: Controle financeiro independente para o gestor.
+
 
 ## 📈 Dashboards
 ### 1. Dashboard Geral 🌐
@@ -125,6 +135,32 @@ Este projeto implementa um **Dashboard Geral da Empresa** utilizando Python, Das
 - **Despesas Pessoais** 💳: Novo dashboard independente para o gestor, com análises detalhadas de gastos pessoais, tendências e recomendações.
 - **Robustez** 🛡️: Adicionado tratamento de erros para carregamento de arquivos e dados vazios.
 - **Estilo** 🎨: Design consistente com fundo claro, sombras e layout em grade.
+
+- 🛠️ Stack Tecnológica
+- Linguagem: Python 3.9+ (Pandas para ETL, Dash para Visualização).
+- Orquestração: Kubernetes (Minikube) com foco em Self-healing e Scalability.
+- Containers: Docker com servidor de produção Gunicorn.
+- IAC/DevOps: Terraform e GitHub Actions para fluxos de CI/CD.
+
+- 🚀 Como Executar o Ecossistema
+-  1. Deploy Automático (Kubernetes)
+Para subir o ambiente completo (infraestrutura + aplicação):
+$chmod +x setup.sh$ ./setup.sh
+
+- 2. Ciclo de Vida de Dados (ETL)
+Os dados são limpos e tratados antes da visualização para garantir integridade:
+$ python3 tratamento/trata_dados.py
+
+- 3. Acesso Externo
+Como o cluster opera em rede isolada, use o Port-Forward para acessar pelo Windows:
+$ kubectl port-forward svc/powerbi-service 8888:8050 --address 0.0.0.0
+Acesse em: http://localhost:8888 🌐
+
+- ✨ Diferenciais Técnicos
+- Resiliência: Uso de ReplicaSet para manter a aplicação online 24/7.
+- Processamento em Larga Escala: Performance validada em datasets de 150 mil linhas.
+- Auditoria: Geração automática de logs de erro e categorização (logs/descricoes_nao_categorizadas.log).
+- Infra Multi-Cloud: Preparado para deploy via Terraform em provedores de nuvem.
 
 ## 📝 Notas
 - ⚠️ Ajuste o campo de custo no Dashboard de Logística se disponível (atualmente usa `Peso (kg)` como proxy).
