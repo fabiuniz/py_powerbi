@@ -53,7 +53,9 @@ descricoes_para_remover = [
 
 # Os arquivos para extrair informações     # pdftotext.exe
 file_paths = [
-        '../../../../Doc/Docs/Extratos/extrato_032026_260505_124517.txt',  # 04/26 a 06/26
+        '../../../../Doc/Docs/Extratos/extrato_052026_260716_102322.txt',  # 06/26 a 07/26
+        '../../../../Doc/Docs/Extratos/extrato_042026_260602_181120.txt',  # 04/26 a 06/26
+        '../../../../Doc/Docs/Extratos/extrato_032026_260505_124517.txt',  # 03/26 a 05/26
         '../../../../Doc/Docs/Extratos/extrato_012026_260313_202844.txt',  # 02/26 a 03/26
         '../../../../Doc/Docs/Extratos/extrato_122025_260202_174922.txt',  # 01/26 a 02/26
         '../../../../Doc/Docs/Extratos/extrato_122025_251231_134915.txt',  # 10/25 a 12/25

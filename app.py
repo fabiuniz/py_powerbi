@@ -2,12 +2,11 @@
 import base64
 import pandas as pd
 import io
-from dash import Dash, html, dcc, callback, Output, Input
+from dash import Dash, html, dcc, callback, Output, Input, State, dash_table
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime
 import logging
-import dash_table
 
 # Configurar o logging
 logging.basicConfig(
@@ -948,13 +947,15 @@ def get_relatorio_despesas_por_mes():
     return html.Div([
         html.H2("Relatório de Despesas Mensais por Categoria", className="text-2xl font-bold mb-4 text-gray-800"),
         dcc.Graph(figure=fig_relatorio_barras, className="dashboard-section"),    
-        # CONTAINER COM SCROLL ÚNICO
+        
+        # Container das Tabelas
         html.Div(className="dashboard-section", style={'overflowX': 'auto', 'width': '100%'}, children=[
-            # 1. Tabela de Dados
+            # 1. Tabela Principal
             dash_table.DataTable(
                 id='table-relatorio-mensal',
                 columns=columns,
                 data=df_relatorio_mensal.to_dict('records'),
+                style_data={'cursor': 'pointer'},
                 export_format="csv",
                 filter_action="native",
                 sort_action="native",
@@ -968,19 +969,22 @@ def get_relatorio_despesas_por_mes():
                     'padding': '10px'
                 },
             ),
-            # 2. Tabela de Total (Respeita o Filtro e nunca some)
+            # 2. Tabela de Total
             dash_table.DataTable(
                 id='table-total-footer',
                 columns=columns,
-                data=[], # Preenchido pelo callback
+                data=[], 
                 style_table={'minWidth': '100%', 'marginTop': '-1px'},
-                style_header={'display': 'none'}, # Esconde o cabeçalho
+                style_header={'display': 'none'}, 
                 style_cell={
                     'minWidth': '100px', 'width': '100px', 'maxWidth': '100px',
                     'fontWeight': 'bold', 'backgroundColor': '#f1f3f5'
                 },
             )
-        ])
+        ]), # <-- Fecha o Div do scroll
+        
+        # 3. AREA DE DETALHES (Sempre fora das tabelas para não sumir no scroll)
+        html.Div(id='detalhe-itens-clicados', className="dashboard-section", style={'marginTop': '20px'})
     ])
 
 def layout_geral():
@@ -1084,7 +1088,69 @@ app.layout = html.Div([
     ]),
     html.Div(id='page-content', className="content")
 ])
+#-----------------------------------------------------------
+@callback(
+    Output('detalhe-itens-clicados', 'children'),
+    Input('table-relatorio-mensal', 'active_cell'),
+    State('table-relatorio-mensal', 'derived_virtual_data')
+)
+def mostrar_detalhes_itens(active_cell, virtual_data):
+    if not active_cell or virtual_data is None:
+        return html.P("💡 Dica: Clique em qualquer valor de mês na tabela acima para ver os itens detalhados.", 
+                      className="text-gray-500 italic text-center p-4")
 
+    col_id = active_cell['column_id']
+    row_index = active_cell['row']
+    
+    # Lista de meses para validar o clique
+    meses_lista = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+    
+    if col_id not in meses_lista:
+        return html.P("Selecione um valor de mês para detalhamento.", className="text-warning")
+
+    # Extrai os dados da célula clicada
+    categoria_clicada = virtual_data[row_index]['Categoria']
+    ano_clicado = virtual_data[row_index]['Ano']
+    
+    # Mapa para o filtro
+    mapa_meses = {m: i+1 for i, m in enumerate(meses_lista)}
+    mes_num = mapa_meses[col_id]
+
+    try:
+        # Carregamos o CSV original para buscar as linhas que compõem o total
+        df_raw = pd.read_csv('csv/despesas.csv', sep=';', encoding='utf-8')
+        df_raw['Data'] = pd.to_datetime(df_raw['Data'], format='%d/%m/%Y', errors='coerce')
+        
+        # Limpeza rápida para o filtro bater
+        df_raw['Valor_Num'] = df_raw['Valor'].astype(str).str.replace('.', '', regex=False).str.replace(',', '.', regex=False)
+        df_raw['Valor_Num'] = pd.to_numeric(df_raw['Valor_Num'], errors='coerce')
+        
+        # Filtro mestre
+        df_detalhe = df_raw[
+            (df_raw['Categoria'] == categoria_clicada) & 
+            (df_raw['Data'].dt.month == mes_num) & 
+            (df_raw['Data'].dt.year == ano_clicado) &
+            (df_raw['Valor_Num'] < 0)
+        ].copy()
+        
+        df_detalhe['Valor'] = df_detalhe['Valor_Num'].abs()
+
+        return html.Div([
+            html.H3(f"📋 Detalhamento: {categoria_clicada} ({col_id}/{ano_clicado})", 
+                    className="text-lg font-bold mb-3 text-blue-800"),
+            dash_table.DataTable(
+                data=df_detalhe[['Data', 'Categoria', 'Valor']].to_dict('records'),
+                columns=[{"name": i, "id": i} for i in ['Data', 'Categoria', 'Valor']],
+                style_header={'backgroundColor': '#2c3e50', 'color': 'white'},
+                style_cell={'textAlign': 'left', 'padding': '8px'},
+                page_size=10,
+                style_data_conditional=[{'if': {'row_index': 'odd'}, 'backgroundColor': '#f2f2f2'}]
+            )
+        ])
+    except Exception as e:
+        return html.P(f"Erro ao carregar detalhes: {str(e)}", className="text-danger")
+#---------------------------------------------------------------
 @callback(
     Output('table-total-footer', 'data'),
     Input('table-relatorio-mensal', 'derived_virtual_data')
@@ -1108,7 +1174,7 @@ def atualizar_rodape_dinamico(rows):
     linha_total['Ano'] = 'Total'
     linha_total['Categoria'] = 'TOTAL FILTRADO'    
     return [linha_total]
-
+#------------------------------------------------------------
 # Callback para navegação entre páginas
 @callback(
     Output('page-content', 'children'),
