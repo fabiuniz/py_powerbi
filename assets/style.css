@@ -1,0 +1,71 @@
+/* Alinha os botões lado a lado no topo esquerdo do container */
+.area-botoes-lado-a-lado {
+    display: flex;
+    gap: 10px; /* Espaço entre o botão Imprimir e o Exportar */
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+/* Efeitos de hover para ambos os botões ficarem iguais */
+.area-botoes-lado-a-lado button:hover {
+    background-color: #e2e6ea !important;
+}
+
+/* Garante que os dois botões fiquem invisíveis na folha impressa */
+@media print {
+    .area-botoes-lado-a-lado {
+        display: none !important;
+    }
+}
+@media print {
+    /* Força orientação Paisagem (Landscape) */
+    @page {
+        size: landscape;
+        margin: 1.2cm;
+    }
+
+    /* Esconde absolutamente todos os elementos da página para evitar conflito de divs pai */
+    body * {
+        visibility: hidden !important;
+    }
+
+    /* Torna apenas a área de impressão visível */
+    .secao-impressao,
+    .secao-impressao * {
+        visibility: visible !important;
+    }
+
+    /* Reposiciona o relatório para o topo esquerdo absoluto da folha */
+    .secao-impressao {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+    }
+
+    /* Remove rolagem/scroll que faz a tabela sumir no papel */
+    .secao-impressao .area-tabela {
+        overflow: visible !important;
+        overflow-x: visible !important;
+        width: 100% !important;
+    }
+
+    /* Esconde elementos que não devem sair na impressão (Botão e Gráfico se preferir ocultá-lo) */
+    #btn-print,
+    .no-print,
+    .no-print * {
+        display: none !important;
+        visibility: hidden !important;
+    }
+
+    /* Otimiza as fontes das tabelas para o papel */
+    .dash-spreadsheet-container, table {
+        width: 100% !important;
+    }
+    
+    .dash-spreadsheet th, 
+    .dash-spreadsheet td {
+        font-size: 8pt !important;
+        padding: 4px !important;
+    }
+}

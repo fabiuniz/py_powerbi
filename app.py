@@ -2,11 +2,13 @@
 import base64
 import pandas as pd
 import io
-from dash import Dash, html, dcc, callback, Output, Input, State, dash_table
+from dash import Dash, html, dcc, callback, Output, Input, State, dash_table,clientside_callback
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime
 import logging
+
+
 
 # Configurar o logging
 logging.basicConfig(
@@ -106,7 +108,7 @@ df_logistica = load_logistics_data()
 df_vendas = load_sales_data()
 
 # --- 2. Inicialização do Dash ---
-app = Dash(__name__)
+app = Dash(__name__, suppress_callback_exceptions=True)
 server = app.server  # Necessário para o Gunicorn no Docker
 
 # Estilo CSS para o fundo e elementos do dashboard
@@ -944,46 +946,95 @@ def get_relatorio_despesas_por_mes():
             }
         columns.append(col_def)
 
-    return html.Div([
+    return html.Div(children=[
+        # Componente invisível que gerencia o download do arquivo
+        dcc.Download(id="download-dataframe-csv"),
+        
         html.H2("Relatório de Despesas Mensais por Categoria", className="text-2xl font-bold mb-4 text-gray-800"),
         dcc.Graph(figure=fig_relatorio_barras, className="dashboard-section"),    
         
         # Container das Tabelas
-        html.Div(className="dashboard-section", style={'overflowX': 'auto', 'width': '100%'}, children=[
-            # 1. Tabela Principal
-            dash_table.DataTable(
-                id='table-relatorio-mensal',
-                columns=columns,
-                data=df_relatorio_mensal.to_dict('records'),
-                style_data={'cursor': 'pointer'},
-                export_format="csv",
-                filter_action="native",
-                sort_action="native",
-                page_size=100, # Aumentado para o total não ir para a página 2
-                style_table={'minWidth': '100%'},
-                style_header={'backgroundColor': '#f8f9fa', 'fontWeight': 'bold'},
-                style_cell={
-                    'minWidth': '100px',
-                    'width': '100px',
-                    'maxWidth': '100px',
-                    'padding': '10px'
-                },
-            ),
-            # 2. Tabela de Total
-            dash_table.DataTable(
-                id='table-total-footer',
-                columns=columns,
-                data=[], 
-                style_table={'minWidth': '100%', 'marginTop': '-1px'},
-                style_header={'display': 'none'}, 
-                style_cell={
-                    'minWidth': '100px', 'width': '100px', 'maxWidth': '100px',
-                    'fontWeight': 'bold', 'backgroundColor': '#f1f3f5'
-                },
+        html.Div(className="dashboard-section area-tabela", style={'overflowX': 'auto', 'width': '100%'}, children=[
+            
+            # 🗂️ OS DOIS BOTÕES LADO A LADO DO MESMO TAMANHO E ESTILO
+            html.Div(className="area-botoes-lado-a-lado", children=[
+                # Botão 1: Imprimir
+                html.Button(
+                    "🖨️ Imprimir",
+                    id="btn-print",
+                    n_clicks=0,
+                    style={
+                        'backgroundColor': '#f8f9fa',
+                        'color': '#212529',
+                        'border': '1px solid #dee2e6',
+                        'padding': '6px 12px',
+                        'borderRadius': '4px',
+                        'cursor': 'pointer',
+                        'fontWeight': '600',
+                        'fontSize': '12px',
+                        'display': 'inline-flex',
+                        'alignItems': 'center',
+                    }
+                ),
+                # Botão 2: Exportar (Criado agora)
+                html.Button(
+                    "📥 Exportar Planilha (CSV)",
+                    id="btn-export-csv",
+                    n_clicks=0,
+                    style={
+                        'backgroundColor': '#f8f9fa',
+                        'color': '#212529',
+                        'border': '1px solid #dee2e6',
+                        'padding': '6px 12px',
+                        'borderRadius': '4px',
+                        'cursor': 'pointer',
+                        'fontWeight': '600',
+                        'fontSize': '12px',
+                        'display': 'inline-flex',
+                        'alignItems': 'center',
+                    }
+                ),
+            ]),
+            
+            # Área de Impressão (Apenas as duas tabelas)
+            html.Div(
+                className="secao-impressao", 
+                children=[
+                    # 1. Tabela Principal (Export_format removido daqui)
+                    dash_table.DataTable(
+                        id='table-relatorio-mensal',
+                        columns=columns,
+                        data=df_relatorio_mensal.to_dict('records'),
+                        style_data={'cursor': 'pointer'},
+                        filter_action="native",
+                        sort_action="native",
+                        page_size=100,
+                        style_table={'minWidth': '100%'},
+                        style_header={'backgroundColor': '#f8f9fa', 'fontWeight': 'bold'},
+                        style_cell={
+                            'minWidth': '100px',
+                            'width': '100px',
+                            'maxWidth': '100px',
+                            'padding': '10px'
+                        },
+                    ),
+                    # 2. Tabela de Total
+                    dash_table.DataTable(
+                        id='table-total-footer',
+                        columns=columns,
+                        data=[], 
+                        style_table={'minWidth': '100%', 'marginTop': '-1px'},
+                        style_header={'display': 'none'}, 
+                        style_cell={
+                            'minWidth': '100px', 'width': '100px', 'maxWidth': '100px',
+                            'fontWeight': 'bold', 'backgroundColor': '#f1f3f5'
+                        },
+                    )
+                ]
             )
-        ]), # <-- Fecha o Div do scroll
+        ]),
         
-        # 3. AREA DE DETALHES (Sempre fora das tabelas para não sumir no scroll)
+        # Area de Detalhes
         html.Div(id='detalhe-itens-clicados', className="dashboard-section", style={'marginTop': '20px'})
     ])
 
@@ -1074,7 +1125,7 @@ def layout_geral():
 # --- 7. Configuração de Rotas ---
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
-    html.Div(className="header", children=[
+    html.Div(id='dummy-output', style={'display': 'none'},className="header", children=[
         html.H1("Dashboard Geral da Empresa", className="text-4xl font-bold"),
     ]),
     html.Div(className="nav-bar", children=[
@@ -1092,7 +1143,8 @@ app.layout = html.Div([
 @callback(
     Output('detalhe-itens-clicados', 'children'),
     Input('table-relatorio-mensal', 'active_cell'),
-    State('table-relatorio-mensal', 'derived_virtual_data')
+    State('table-relatorio-mensal', 'derived_virtual_data'),
+    prevent_initial_call=True
 )
 def mostrar_detalhes_itens(active_cell, virtual_data):
     if not active_cell or virtual_data is None:
@@ -1150,10 +1202,25 @@ def mostrar_detalhes_itens(active_cell, virtual_data):
         ])
     except Exception as e:
         return html.P(f"Erro ao carregar detalhes: {str(e)}", className="text-danger")
+    
+clientside_callback(
+    """
+    function(n_clicks) {
+        if (n_clicks && n_clicks > 0) {
+            window.print();
+        }
+        return ""; // Retorna texto vazio para a nossa div invisível
+    }
+    """,
+    Output("dummy-output", "children"),  # <--- Direcionado para a div de descarte
+    Input("btn-print", "n_clicks"),
+    prevent_initial_call=True
+)
 #---------------------------------------------------------------
 @callback(
     Output('table-total-footer', 'data'),
-    Input('table-relatorio-mensal', 'derived_virtual_data')
+    Input('table-relatorio-mensal', 'derived_virtual_data'),
+    prevent_initial_call=True
 )
 def atualizar_rodape_dinamico(rows):
     if rows is None:
@@ -1175,6 +1242,21 @@ def atualizar_rodape_dinamico(rows):
     linha_total['Categoria'] = 'TOTAL FILTRADO'    
     return [linha_total]
 #------------------------------------------------------------
+@app.callback(
+    Output("download-dataframe-csv", "data"),
+    Input("btn-export-csv", "n_clicks"),
+    State("table-relatorio-mensal", "derived_virtual_data"), # Pega os dados filtrados/ordenados na tela
+    prevent_initial_call=True,
+)
+def export_table_to_csv(n_clicks, virtual_data):
+    if n_clicks > 0 and virtual_data:
+        # Converte os dados ativos da tabela de volta para um DataFrame
+        df_filtered = pd.DataFrame(virtual_data)
+        
+        # Retorna o arquivo CSV formatado para download
+        return dcc.send_data_frame(df_filtered.to_csv, "relatorio_mensal.csv", index=False, sep=";", encoding="utf-8-sig")
+    return None    
+#------------------------------------------------------------
 # Callback para navegação entre páginas
 @callback(
     Output('page-content', 'children'),
@@ -1195,7 +1277,7 @@ def display_page(pathname):
         return get_relatorio_despesas_por_mes()
     else:
         return layout_geral()
-
+#------------------------------------------------------------
 # --- 8. Execução da Aplicação ---
 if __name__ == '__main__':
     app.run_server(debug=True, host='0.0.0.0', port=8050)
