@@ -951,7 +951,9 @@ def get_relatorio_despesas_por_mes():
         dcc.Download(id="download-dataframe-csv"),
         
         html.H2("Relatório de Despesas Mensais por Categoria", className="text-2xl font-bold mb-4 text-gray-800"),
-        dcc.Graph(figure=fig_relatorio_barras, className="dashboard-section"),    
+        
+        # 🔄 ALTERADO: Sem 'figure' estática e com ID definido para o callback atualizar
+        dcc.Graph(id="grafico-relatorio-mensal", className="dashboard-section"),    
         
         # Container das Tabelas
         html.Div(className="dashboard-section area-tabela", style={'overflowX': 'auto', 'width': '100%'}, children=[
@@ -976,7 +978,7 @@ def get_relatorio_despesas_por_mes():
                         'alignItems': 'center',
                     }
                 ),
-                # Botão 2: Exportar (Criado agora)
+                # Botão 2: Exportar
                 html.Button(
                     "📥 Exportar Planilha (CSV)",
                     id="btn-export-csv",
@@ -1000,7 +1002,7 @@ def get_relatorio_despesas_por_mes():
             html.Div(
                 className="secao-impressao", 
                 children=[
-                    # 1. Tabela Principal (Export_format removido daqui)
+                    # 1. Tabela Principal
                     dash_table.DataTable(
                         id='table-relatorio-mensal',
                         columns=columns,
@@ -1256,6 +1258,76 @@ def export_table_to_csv(n_clicks, virtual_data):
         # Retorna o arquivo CSV formatado para download
         return dcc.send_data_frame(df_filtered.to_csv, "relatorio_mensal.csv", index=False, sep=";", encoding="utf-8-sig")
     return None    
+#------------------------------------------------------------
+# Mapeamento estático dos meses usado para criar a figura
+NOMES_MESES_LISTA = [
+    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+]
+
+@callback(
+    Output('grafico-relatorio-mensal', 'figure'),
+    Input('table-relatorio-mensal', 'derived_virtual_data'),
+    prevent_initial_call=False
+)
+def atualizar_grafico_dinamico(rows):
+    if not rows:
+        return go.Figure()
+
+    # 1. Transforma os dados da tabela em DataFrame
+    df_filtrado = pd.DataFrame(rows)
+
+    # 2. Ignora a linha de "TOTAL" para não distorcer o gráfico
+    if 'Categoria' in df_filtrado.columns:
+        df_filtrado = df_filtrado[df_filtrado['Categoria'] != 'TOTAL FILTRADO']
+        df_filtrado = df_filtrado[df_filtrado['Categoria'] != 'TOTAL']
+
+    # 3. Identifica quais meses realmente têm colunas no DataFrame
+    meses_existentes = [mes for mes in NOMES_MESES_LISTA if mes in df_filtrado.columns]
+
+    # 4. TRANSFORMAÇÃO CHAVE: Transforma colunas de meses em linhas (Melt)
+    # Isso muda o formato de "largo" para "longo" para o Plotly ler corretamente
+    df_longo = df_filtrado.melt(
+        id_vars=['Ano', 'Categoria'],
+        value_vars=meses_existentes,
+        var_name='Mês',
+        value_name='Valor'
+    )
+
+    # 5. Descobre os anos filtrados para o título
+    anos_visiveis = df_filtrado['Ano'].unique() if 'Ano' in df_filtrado.columns else []
+    if len(anos_visiveis) == 1:
+        titulo_grafico = f'Evolução dos Gastos Mensais - Ano {anos_visiveis[0]}'
+    elif len(anos_visiveis) > 1:
+        titulo_grafico = f'Evolução dos Gastos Mensais - Anos: {", ".join(map(str, sorted(anos_visiveis)))}'
+    else:
+        titulo_grafico = 'Evolução dos Gastos Mensais por Categoria'
+
+    # 6. Cria o gráfico empilhado de forma limpa
+    fig = px.bar(
+        df_longo,
+        x='Mês',               # Linha do tempo (Janeiro, Fevereiro...) no eixo X
+        y='Valor',             # Altura da barra é o valor gasto
+        color='Categoria',     # Cada cor representa uma Categoria de despesa
+        title=titulo_grafico,
+        labels={'Valor': 'Valor (R$)', 'Mês': 'Mês de Referência', 'Categoria': 'Categoria'},
+        template="plotly_white",
+        barmode="stack"        # 🌟 EMPILHADO: categorias ficam uma em cima da outra por mês
+    )
+
+    # 7. Formatações visuais do eixo Y e legenda
+    fig.update_layout(
+        xaxis_title="Meses",
+        yaxis_title="Gasto Total (R$)",
+        yaxis=dict(
+            tickprefix='R$ ',
+            tickformat=',.2f'
+        ),
+        legend_title_text="Categorias",
+        hovermode="closest"  
+    )
+
+    return fig
 #------------------------------------------------------------
 # Callback para navegação entre páginas
 @callback(
