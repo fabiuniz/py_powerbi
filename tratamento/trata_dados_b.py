@@ -144,12 +144,12 @@ def process_full_statement(file_path, categorization_rules):
     2. Extrai os campos.
     3. Retorna um DataFrame com os dados brutos e um DataFrame categorizado.
     """
-    print(f"--- 📖1. Lendo e limpando o arquivo bruto: {file_path}")
+    print(f"--- 📖 Lendo e limpando o arquivo bruto: {file_path}")
     lines = preprocess_raw_statement(file_path)
     if not lines:
         return None, None
 
-    print("--- 🔍2. Extraindo campos (Data, Descrição, Valor)...")
+    print("--- 🔍 Extraindo campos (Data, Descrição, Valor)...")
     df_raw = parse_statement_lines(lines)
     if df_raw.empty:
         print(f"⚠️Nenhuma linha válida encontrada no arquivo {file_path}. O processo foi encerrado.")
@@ -211,6 +211,7 @@ if __name__ == '__main__':
     all_dataframes = []
     
     # Itera sobre a lista de arquivos e processa cada um, acumulando os DataFrames.
+    print("\n📖1. Extraindo todas as transações...")
     for path in file_paths:
         df_raw, _ = process_full_statement(path, categorization_rules)
         if df_raw is not None and not df_raw.empty:
@@ -218,8 +219,9 @@ if __name__ == '__main__':
     
     # Se houver DataFrames para concatenar, continua o processamento.
     if all_dataframes:
-        print("\n--- 🔗3. Unindo todos os arquivos processados em um único DataFrame...")
+        print("\n🔗2. Unindo todos os arquivos processados em um único DataFrame...")
         df_combined = pd.concat(all_dataframes, ignore_index=True)
+        print(f"---📊 Total de registros unificados: {len(df_combined)} linhas.\n")
 
         # --- MÉTRICAS DE AUDITORIA INICIAL ---
         # Converte temporariamente para float para somar o valor bruto total extraído
@@ -227,13 +229,13 @@ if __name__ == '__main__':
         total_linhas_bruto = len(df_combined)
         valor_total_bruto = df_combined['Valor_num_temp'].sum()
 
-        print("--- 🏷️4. Categorizando todas as transações...")
+        print("🏷️3. Categorizando todas as transações...")
         df_categorized, _ = categorize_transactions(df_combined.copy(), categorization_rules)
         nao_categorizadas = df_categorized[df_categorized['Categoria'] == 'Nao_Categorizado'].copy()
         print_nao_categorizadas(nao_categorizadas)
 
         # --- Removendo descrições indesejadas do DataFrame completo ---
-        print("--- 🧹4.1. Removendo descrições indesejadas...")
+        print("🧹3.1. Removendo descrições indesejadas...")
         padrao_regex = '|'.join(descricoes_para_remover)
         mascara_remocao = df_categorized['Descricao'].str.contains(padrao_regex, case=False, na=False)
         df_filtrado_final = df_categorized[~mascara_remocao].copy()
@@ -285,10 +287,14 @@ if __name__ == '__main__':
         final_df = df_filtrado_final.copy() # Good practice to work on a copy
 
         # --- Passo 5: Chamada da função de limpeza e ordenação ---
-        print("--- ⚡5. Removendo duplicatas e ordenando o DataFrame...")
+        print("⚡4. Removendo duplicatas e ordenando o DataFrame...")
+                # 1. Guarda a quantidade de linhas antes da limpeza
+        linhas_antes = len(final_df)
+                # 2. Executa a função
         final_df = clean_and_sort_dataframe(final_df)
-
-        # ... (other code)
+                # 3. Calcula e exibe a quantidade de duplicatas removidas
+        removidos = linhas_antes - len(final_df)
+        print(f"--- 🗑️ Linhas duplicadas removidas: {removidos}")
 
         # Convert 'Data' to datetime just to be safe before formatting
         final_df['Data'] = pd.to_datetime(final_df['Data'], format='%d/%m/%Y', errors='coerce')
@@ -308,10 +314,12 @@ if __name__ == '__main__':
         # Salva o DataFrame em um arquivo CSV
         final_df.to_csv(output_csv_path, sep=';', index=False)
         
-        print(f"\n💾Dados processados e salvos em: {output_csv_path}")
-        print("\nPrimeiras 5 linhas do arquivo gerado:")
-        print(final_df.head())
-
+        print(f"\n💾5. Dados processados e salvos em: {output_csv_path}")
+        print("\n--- Primeiras 5 linhas do arquivo gerado:")
+        preview_linhas = final_df.head().to_string()
+        preview_com_recuo = "\n".join("        " + linha for linha in preview_linhas.split("\n"))        
+        print(preview_com_recuo)
+        
         # --- MÉTRICAS DE AUDITORIA FINAL ---
         final_df['Valor_num_temp'] = final_df['Valor'].str.replace(',', '.').astype(float)
         total_linhas_final = len(final_df)
@@ -323,14 +331,14 @@ if __name__ == '__main__':
         
         # --- PAINEL DE AUDITORIA ---
         print("\n==================================================")
-        print("📋 RELATÓRIO DE RECONCILIAÇÃO (AUDITORIA DE DADOS)")
+        print("📋6. RELATÓRIO DE RECONCILIAÇÃO (AUDITORIA DE DADOS)")
         print("==================================================")
         print(f"📥 Total extraído dos arquivos: {total_linhas_bruto} linhas | R$ {valor_total_bruto:.2f}")
         print(f"🧹 Removidos por filtro (Saldos etc.): {linhas_removidas_filtros} linhas | R$ {valor_removido_filtros:.2f}")
         print(f"👥 Duplicatas eliminadas: {linhas_duplicadas} linhas | R$ {valor_duplicadas:.2f}")
         print(f"💾 Gravados no CSV Final: {total_linhas_final} lines | R$ {valor_total_final:.2f}")
         print("--------------------------------------------------")
-        
+
         # A prova dos nove:
         diferenca = (valor_total_bruto - (valor_total_final + valor_removido_filtros + valor_duplicadas))
         if abs(diferenca) < 0.01:
