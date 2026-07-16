@@ -1,6 +1,11 @@
 import pandas as pd
 import re
+import hashlib
+import io
+import sys
 from rules import categorization_rules,descricoes_para_remover,file_paths
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
 def preprocess_raw_statement(file_path):
     """
@@ -60,6 +65,13 @@ def categorize_transactions(df, categorization_rules):
     for category, rules in categorization_rules.items():
         for rule in rules:
             
+            # --- RESET DAS VARIÁVEIS PARA CADA REGRA ---
+            descricao_pattern = None
+            valor_exato = None
+            valor_maior_que = None
+            valor_menor_que = None
+            valor_entre = None
+
             # --- Inicia a máscara de categorização ---
             combined_mask = pd.Series([True] * len(df_categorized))
 
@@ -92,14 +104,15 @@ def categorize_transactions(df, categorization_rules):
                     valor_mask = (df_categorized['Valor_num'] >= valor_min) & (df_categorized['Valor_num'] <= valor_max)
                     combined_mask = combined_mask & valor_mask
             
-            # Se houver um padrão de descrição, aplica a máscara.
+            # Se houver um padrão de descrição válido para esta regra, aplica a máscara.
             if descricao_pattern:
                 descricao_mask = df_categorized['Descricao'].str.contains(descricao_pattern, case=False, na=False)
                 combined_mask = combined_mask & descricao_mask
+            else:
+                # Se não houver padrão de descrição definido para a regra, ela não deve validar nada por texto
+                combined_mask = pd.Series([False] * len(df_categorized))
 
             # Aplica a categoria APENAS se a categoria atual for 'Nao_Categorizado'.
-            # Isso impede a sobrescrita.
-            # O `loc` agora é usado em `df_categorized`
             mask_to_apply = combined_mask & (df_categorized['Categoria'] == 'Nao_Categorizado')
             df_categorized.loc[mask_to_apply, 'Categoria'] = category
             
@@ -131,15 +144,15 @@ def process_full_statement(file_path, categorization_rules):
     2. Extrai os campos.
     3. Retorna um DataFrame com os dados brutos e um DataFrame categorizado.
     """
-    print(f"--- 1. Lendo e limpando o arquivo bruto: {file_path}")
+    print(f"--- 📖1. Lendo e limpando o arquivo bruto: {file_path}")
     lines = preprocess_raw_statement(file_path)
     if not lines:
         return None, None
 
-    print("--- 2. Extraindo campos (Data, Descrição, Valor)...")
+    print("--- 🔍2. Extraindo campos (Data, Descrição, Valor)...")
     df_raw = parse_statement_lines(lines)
     if df_raw.empty:
-        print(f"Nenhuma linha válida encontrada no arquivo {file_path}. O processo foi encerrado.")
+        print(f"⚠️Nenhuma linha válida encontrada no arquivo {file_path}. O processo foi encerrado.")
         return None, None
 
     return df_raw, None # Retorna o DataFrame bruto e None para o categorizado, pois a categorização será feita no final.
@@ -162,6 +175,34 @@ def add_txt(df, file_path):
             
         f.write("-" * 50 + "\n")
 
+import hashlib
+
+def descaracterizar_misto(descricao: str) -> str:
+    if not descricao:
+        return "***"    
+    palavras = descricao.split()
+    primeira_palavra = palavras[0] if palavras else ""    
+    # Gera o hash do texto completo para garantir a unicidade
+    hash_unico = hashlib.sha256(descricao.encode('utf-8')).hexdigest()[:8]    
+    # Retorna a primeira palavra + o hash identificador
+    return f"{primeira_palavra} #{hash_unico}"
+
+def print_nao_categorizadas(nao_categorizadas):
+    if not nao_categorizadas.empty:
+        # 2. Remove duplicatas apenas para exibição no terminal (evita poluição visual)
+        nao_categorizadas_unicas = nao_categorizadas.drop_duplicates(subset=['Descricao'])
+        print(f"\n⚠️  ALERTA: Foram encontradas {len(nao_categorizadas_unicas)} descrições únicas sem categoria!")
+        print("-" * 80)
+        print(f"{'DATA':<12} | {'DESCRIÇÃO':<45} | {'VALOR (R$)':<10}")
+        print("-" * 80)        
+        # 3. Varre e imprime cada uma delas formatada
+        for index, row in nao_categorizadas_unicas.iterrows():
+            print(f"{row['Data']:<12} | {row['Descricao']:<45} | {row['Valor']:<10}")        
+        print("-" * 80)
+        print("💡 Dica: Adicione estes termos acima ao seu arquivo 'rules.py' para categorizá-los.\n")
+    else:
+        print("--- 🎉 Excelente! Todas as transações foram categorizadas com sucesso!\n")
+
 # --- Bloco principal de execução ---
 if __name__ == '__main__':
 
@@ -177,13 +218,22 @@ if __name__ == '__main__':
     
     # Se houver DataFrames para concatenar, continua o processamento.
     if all_dataframes:
-        print("\n--- 3. Unindo todos os arquivos processados em um único DataFrame...")
+        print("\n--- 🔗3. Unindo todos os arquivos processados em um único DataFrame...")
         df_combined = pd.concat(all_dataframes, ignore_index=True)
-        print("--- 4. Categorizando todas as transações...")
+
+        # --- MÉTRICAS DE AUDITORIA INICIAL ---
+        # Converte temporariamente para float para somar o valor bruto total extraído
+        df_combined['Valor_num_temp'] = df_combined['Valor'].str.replace(',', '.').astype(float)
+        total_linhas_bruto = len(df_combined)
+        valor_total_bruto = df_combined['Valor_num_temp'].sum()
+
+        print("--- 🏷️4. Categorizando todas as transações...")
         df_categorized, _ = categorize_transactions(df_combined.copy(), categorization_rules)
+        nao_categorizadas = df_categorized[df_categorized['Categoria'] == 'Nao_Categorizado'].copy()
+        print_nao_categorizadas(nao_categorizadas)
 
         # --- Removendo descrições indesejadas do DataFrame completo ---
-        print("--- 4.1. Removendo descrições indesejadas...")
+        print("--- 🧹4.1. Removendo descrições indesejadas...")
         padrao_regex = '|'.join(descricoes_para_remover)
         mascara_remocao = df_categorized['Descricao'].str.contains(padrao_regex, case=False, na=False)
         df_filtrado_final = df_categorized[~mascara_remocao].copy()
@@ -196,6 +246,9 @@ if __name__ == '__main__':
         df_combined['Data'] = df_combined['Data'].dt.strftime('%d/%m/%Y')
         
         # Salva o DataFrame já ordenado no arquivo de log
+        # Se você removeu descrições indesejadas (como SALDO ANTERIOR), guarde o impacto:
+        valor_removido_filtros = df_categorized[mascara_remocao]['Valor_num'].sum()
+        linhas_removidas_filtros = mascara_remocao.sum()
         add_txt(df_combined, "../logs/rep_combined_trated.log")
 
         # Filtra o DataFrame para encontrar as transações não categorizadas
@@ -215,22 +268,24 @@ if __name__ == '__main__':
             # Chama a função para salvar as transações não categorizadas
             add_txt(uncategorized_df, output_txt_path)
 
-            print("\n--- ATENÇÃO: Descrições não categorizadas encontradas! ---")
+            print("\n--- ⚠️ATENÇÃO: Descrições não categorizadas encontradas! ---")
             print("As seguintes transações serão salvas com a categoria 'Nao_Categorizado':")
             
             # Exibe as 3 colunas (Data, Descricao, Valor)
             print("-" * 50)
-            for index, row in uncategorized_df.iterrows():
-                print(f"Data: {row['Data']:<10} | Descrição: {row['Descricao']:<40} | Valor: {row['Valor']}")
+            for index, row in uncategorized_df.iterrows():        
+                #desc = descaracterizar_misto(row['Descricao']);        
+                desc = row['Descricao'];
+                print(f"Data: {row['Data']:<10} | Descrição: {desc:<40} | Valor: {row['Valor']}")
             print("-" * 50)
             
         else:
-            print("\n--- Todas as descrições foram categorizadas com sucesso! ---")
+            print("--- ✨Todas as descrições foram categorizadas com sucesso! ---\n")
         
         final_df = df_filtrado_final.copy() # Good practice to work on a copy
 
         # --- Passo 5: Chamada da função de limpeza e ordenação ---
-        print("--- 5. Removendo duplicatas e ordenando o DataFrame...")
+        print("--- ⚡5. Removendo duplicatas e ordenando o DataFrame...")
         final_df = clean_and_sort_dataframe(final_df)
 
         # ... (other code)
@@ -253,8 +308,35 @@ if __name__ == '__main__':
         # Salva o DataFrame em um arquivo CSV
         final_df.to_csv(output_csv_path, sep=';', index=False)
         
-        print(f"\nDados processados e salvos em: {output_csv_path}")
+        print(f"\n💾Dados processados e salvos em: {output_csv_path}")
         print("\nPrimeiras 5 linhas do arquivo gerado:")
         print(final_df.head())
+
+        # --- MÉTRICAS DE AUDITORIA FINAL ---
+        final_df['Valor_num_temp'] = final_df['Valor'].str.replace(',', '.').astype(float)
+        total_linhas_final = len(final_df)
+        valor_total_final = final_df['Valor_num_temp'].sum()
+        
+        # Cálculo das diferenças (o que foi considerado duplicata)
+        linhas_duplicadas = total_linhas_bruto - total_linhas_final - linhas_removidas_filtros
+        valor_duplicadas = valor_total_bruto - valor_total_final - valor_removido_filtros
+        
+        # --- PAINEL DE AUDITORIA ---
+        print("\n==================================================")
+        print("📋 RELATÓRIO DE RECONCILIAÇÃO (AUDITORIA DE DADOS)")
+        print("==================================================")
+        print(f"📥 Total extraído dos arquivos: {total_linhas_bruto} linhas | R$ {valor_total_bruto:.2f}")
+        print(f"🧹 Removidos por filtro (Saldos etc.): {linhas_removidas_filtros} linhas | R$ {valor_removido_filtros:.2f}")
+        print(f"👥 Duplicatas eliminadas: {linhas_duplicadas} linhas | R$ {valor_duplicadas:.2f}")
+        print(f"💾 Gravados no CSV Final: {total_linhas_final} lines | R$ {valor_total_final:.2f}")
+        print("--------------------------------------------------")
+        
+        # A prova dos nove:
+        diferenca = (valor_total_bruto - (valor_total_final + valor_removido_filtros + valor_duplicadas))
+        if abs(diferenca) < 0.01:
+            print("✅ RECONCILIAÇÃO PERFEITA: A matemática bateu 100%!")
+        else:
+            print(f"❌ ALERTA: Há uma quebra de integridade de R$ {diferenca:.2f} não explicada!")
+        print("==================================================")
     else:
-        print("\nNenhum dado válido para processar.")
+        print("\n⚠️Nenhum dado válido para processar.")

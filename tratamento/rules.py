@@ -1,44 +1,74 @@
 # rules.py
+# rules.py
 categorization_rules = {
-    'ACOUGUE': [r'CASA DE CAR', r'WEST BOI', r'RSHOP MARWAL'],
+    'ACOUGUE': [r'CASA DE CAr', r'WEST BOI', r'RSHOP MARWAL', r'MARWAL'],
     'AEROPORTO': [r'GRU ', r'RSHOP GRU TPS'],
     'BANCO': [r'RSHOP PISTA', r'SEGURO CARTAO', r'TAR PACOTE ITAU', r'TARIFA', r'ITAU', r'PINBANK'],
-    'BELEZA': [r'ANGELA PE', r'TAIYANG', r'CorteFino', r'DEBORARODRI', r'Joyc2208'],
-    'COSTURA': [r'BORDAD',r'YOKO',r'TIAGO MAQUI', r'FIVELAS', r'TECIDOS', r'JJS', r'RSHOP BL PLAST'],
+    'BELEZA': [r'ANGELA PE', r'TAIYANG', r'CORTEFINO', r'DEBORARODRI', r'DEBORAr', r'JOYC2208'],
+    'COSTURA': [r'BORDAD', r'YOKO', r'TIAGO MAQUI', r'FIVELAS', r'TECIDOS', r'JJS', r'BL PLAST'], 
     'CONDOMINIO': [
-        {'descricao': r'PAG BOLETO|MOBILEPAG|MOBILE PAG|CONDOMINIO|RESIDENCIAL', 'valor_entre': [-600.00, -380.00]},            
+        # 1. Regra existente (para descrições que contêm o nome do condomínio)
+        {'descricao': r'CONJUNTO RESIDENCIAL|RESIDENCIAL|CONDOMINIO', 'valor_entre': [-650.00, -350.00]},        
+        # 2. Nova regra para os boletos do Bradesco (Banco 237) na faixa de valor do condomínio
+        {'descricao': r'MOBILE PAG TIT BANCO 237|MOBILEPAG TIT BANCO 237', 'valor_entre': [-600.00, -370.00]},        
+        # 3. Nova regra para os boletos com o código final "6079" que se repete nos pagamentos de -529,76
+        {'descricao': r'PAG TIT 6079|TIT 6079933340', 'valor_entre': [-550.00, -500.00]},
     ],
-    'DENTISTA': [r'Dentista', r'Persio', r'Percio'],
-    'ESTACIONAMENTO': [r'Estacion', r'ESTAC ', r'PARK ', r'ESTAPAR', r'RSHOP SP MARKET E', r'RODOANEL PED', r'ESTAC SHOP'],
+    'DENTISTA': [r'DENTISTA', r'PERSIO', r'PERCIO'],
+    'ESTACIONAMENTO': [r'ESTACION', r'ESTAC ', r'PARK ', r'ESTAPAr', r'SP MARKET E', r'RODOANEL PED', r'ESTAC SHOP'],
     'FARMACIA': [r'GOYA PERFU', r'USEMAISFARM', r'DROGA', r'FARMACIA', r'DROGARIA', r'FARMA', r'MASTER FARMA'],
     'GAS': [r' GAS ', r'INT COMGAS', r'COMGAS', r'ZP GASSI'],
-    'GASOLINA': [r'N S FATIMA',r'AURUM', r'PETROL ', r'AUTOSUL', r'AUTO POSTO', r'POTENCIAL TE', r'P STATION', r'AV JOAO DIAS'],
-    'HORTIFRUIT': [r'FRUTAO', r'CHACARA DO', r'Hortifruti', r'HORTIFRU', r'GRAO DA FAM', r'ORVALHO COM', r'ArmazemFlor'],
-    'IGREJA': [r'CONADIBE', r'ADS', r'SOCIEDADE B', r'ADSA',r'AdsaBrasil'],
-    'IMPRESSORA': [r'PONTODOSCAR', r'PRODATA', r'ATMK COM DE'],
+    'GASOLINA': [r'N S FATIMA', r'AURUM', r'PETROL ', r'AUTOSUL', r'AUTO POSTO', r'POTENCIAL TE', r'P STATION', r'AV JOAO DIAS'],
+    'HORTIFRUIT': [r'FRUTAO', r'CHACARA DO', r'HORTIFRUTI', r'HORTIFRU', r'GRAO DA FAM', r'ORVALHO COM', r'ARMAZEMFLOr', r'HORTIFr'], 
+    'IGREJA': [r'CONADIBE', r'ADS', r'SOCIEDADE B', r'ADSA', r'ADSABRASIL'],
+    'IMPRESSORA': [r'PONTODOSCAr', r'PRODATA', r'ATMK COM DE'],
     'INTERNET': [r'INTERNET', r'NET', r'CLARO'],
     'LUZ': [r'ELETROPAULO', r'ENEL'],
-    'MECANICO': [r' AUTOPE', r'Mercadocar', r'PREMYER', r'CENTRO AUTO', r'CLIMATOA', r'ESCALADA AU', r'MALURE AUTO', r'AUTOZONE'],
-    'MERCADO': [r'OXXO', r'PAO DE AC', r'MiniMercado', r'SUPERM', r'MERCEARIA', r'CHOCOLANDIA', r'EXTRA HIPER', r'ATACAD[AÃ]O', r'MERCADINHO', r'PANIF', r'PADARIA', r'CARREFOUR', r'BIG BOM', r'MERCADO ', r'MARCO', r'MUFFATO', r'GIGA ATACADO', r'DG ALIMENTOS', r'ALEMAO HIGI', r'VPMS', r'SUP CERCADAO', r'NOVA BANDEIR', r'SOL E NEVE',r'FRUTAO'],
-
-    'MATERIAL': [r'MARIKA',r'TINTAS', r'ARAUJO MATER', r'LOJA ELET', r'APOIO TINTAS', r'R PIRES SACO', r'OKINALAR'],
-    'OUTROS': [r'EDUARDODIAS', r'MARIVANLIMA', r'Keverson', r'LucasDaSilva', r'RodrigoDeJes', r'SandraRegina', r'ANDREROBERT', r'DORIVALDO', r'JOSE ROGERIO', r'MARCELO MAGE', r'COREMAS', r'MARIA JOSE', r'PEDRO GUSTAV', r'CAPPTA CORA', r'ETHERIC LIGH', r'DJANIRALEIT', r'VANDERLEI P', r'WILLIAN JOA', r'FRENANDO PA'],
+    'MECANICO': [r' AUTOPE', r'MERCADOCAr', r'PREMYEr', r'CENTRO AUTO', r'CLIMATOA', r'ESCALADA AU', r'MALURE AUTO', r'AUTOZONE', r'FUJIHEI', r'PALUDETO'], 
+    'MERCADO': [
+        r'OXXO', r'PAO DE AC', r'MINIMERCADO', r'SUPERM', r'MERCEARIA', r'CHOCOLANDIA', r'EXTRA HIPEr', r'ATACAD[AÃ]O', 
+        r'MERCADINHO', r'PANIF', r'PADARIA', r'CARREFOUr', r'BIG BOM', r'MERCADO ', r'MARCO', r'MUFFATO', r'GIGA ATACADO', 
+        r'DG ALIMENTOS', r'ALEMAO HIGI', r'VPMS', r'SUP CERCADAO', r'NOVA BANDEIr', r'SOL E NEVE', r'FRUTAO', r'EMPORIUM ME', r'PRECO JUSTO'
+    ],
+    'MATERIAL': [r'MARIKA', r'TINTAS', r'ARAUJO MATEr', r'LOJA ELET', r'APOIO TINTAS', r'R PIRES SACO', r'OKINALAr'],
+    'OUTROS': [
+        r'EDUARDODIAS', r'EDUARDO', r'MARIVAN', r'MARIVAM', r'KEVERSON', r'LUCASDASILVA', r'RODRIGODEJES', r'SANDRAREGINA', 
+        r'ANDREROBERT', r'DORIVALDO', r'DORIVALD', r'JOSE ROGERIO', r'MARCELO MAGE', r'MARCELO MAG', r'COREMAS', r'MARIA JOSE', r'MARIA IMACUL',
+        r'PEDRO GUSTAV', r'CAPPTA CORA', r'ETHERIC LIGH', r'DJANIRALEIT', r'VANDERLEI P', r'WILLIAN JOA', r'FRENANDO PA', 
+        r'VINICIUSOLIV', r'JOZENIBEZER', r'ORLANDOREIS', r'LEANDROSOUZA', r'PAULODEOLIVE', r'S E SOARES', r'JOSAFAF', r'MARIADE',
+        r'SUELLEN ARMA', r'FUNDACAO Ar', r'PG TON', r'GETULIO', r'MERCADOPAGO', r'62 372', r'46 629'  # Adicionados novos padrões de CNPJ e termos corretos
+    ],
     'PAPELARIA': [r'LAN HOUSE', r'KALUNGA'],
-    'PREFEITURA': [r'PM SAO',r'INT PM SAO PAU', r'INT LICENC SP', r'INT MULTA ', r'IPTU', r'IPVA', r'Licenciamento', r'BARUERI', r'LICENC', r'MULTA'],        
-    'RESTAURANTE': [r'FRIENDS',r'BACON',r'CHURRAS',r'BURGER',r'ESFIHA', r'DOGDODIE', r'JIN JIN', r'MP CALDODE', r'MEI MEI', r'EXPRESS GRI', r'Cafeteria', r'CAFE ', r'MANIA DE CHU', r'SABORINI', r'EMPORIO', r'PONTO SP MA', r'DONALD', r'THE STEAK', r'CHURRASCARI', r'AQUARELA', r'DOGAO', r'Feijoada', r'PASTEL', r'Espeto', r'Bacio di', r'VIVENDA DO', r'FRANGO', r'Restaura', r'SANTA GULA', r'PIZZARIA', r'HANNOVER', r'MAGA RESTAUR', r'FATTORIA', r'SAN PIETRO', r'DONA MARIA', r'COMERCIAL VI', r'FRIED CHICKE', r'MP JOILTON', r'SAMPA SUSHI', r'PAG FRIENDS', r'VARANDAS'],
+    'PREFEITURA': [r'PM SAO', r'INT PM SAO PAU', r'INT LICENC SP', r'INT MULTA ', r'IPTU', r'IPVA', r'LICENCIAMENTO', r'BARUERI', r'LICENC', r'MULTA'],        
+    'RESTAURANTE': [
+        r'FRIENDS', r'BACON', r'CHURRAS', r'BURGEr', r'ESFIHA', r'DOGDODIE', r'JIN JIN', r'MP CALDODE', r'MEI MEI', r'EXPRESS GRI', 
+        r'CAFETERIA', r'CAFE ', r'MANIA DE CHU', r'SABORINI', r'EMPORIO', r'PONTO SP MA', r'DONALD', r'THE STEAK', r'CHURRASCARI', 
+        r'AQUARELA', r'DOGAO', r'FEIJOADA', r'PASTEL', r'ESPETO', r'BACIO DI', r'VIVENDA DO', r'FRANGO', r'RESTAURA', r'SANTA GULA', 
+        r'PIZZARIA', r'HANNOVEr', r'MAGA RESTAUr', r'FATTORIA', r'SAN PIETRO', r'DONA MARIA', r'COMERCIAL VI', r'FRIED CHICKE', 
+        r'MP JOILTON', r'SAMPA SUSHI', r'PAG FRIENDS', r'VARANDAS', r'JIM COM', r'SANCREAM', r'PONTO SANTA', r'REAL SUL', r'SALDANHA',
+        r'MP ALE', r'PRA LA DE BO', r'NIPPON', r'ASSB COMERC', r'SPAD' # Adicionado SPAD restaurante
+    ],
     'SAQUE': [r'SAQUE', r'CXE'],
     'SEGURO': [r'PORTO', r'INT TED D', r'BOLETO PORTO S'],
-    'SHOPPING': [r'RIACHUE', r'DAISO', r'LOJAS AMERI', r'BAHIA', r'CELLSHOP', r'SHOPPING', r'SP MARKET', r'LOJAS RENNE', r'CEA ', r'RENNER', r'MULTIPLAN', r'OPCAO CENTER', r'VIVA MORUMBI', r'7015 MORUMB', r'1950 SHOPPIN', r'PORTAL VL DA', r'ANAVITORIAS', r'PARK PLACE'],    
+    'SHOPPING': [
+        r'RIACHUE', r'DAISO', r'LOJAS AMERI', r'BAHIA', r'CELLSHOP', r'SHOPPING', r'SP MARKET', r'LOJAS RENNE', r'CEA ', r'RENNEr', 
+        r'MULTIPLAN', r'OPCAO CENTEr', r'VIVA MORUMBI', r'VIVA MORUMB', r'7015 MORUMB', r'1950 SHOPPIN', r'PORTAL VL DA', r'ANAVITORIAS', r'PARK PLACE',
+        r'DMW COMERCIO', r'JARDIM DAS', r'AUTTAR LOJA', r'GSMMYCOMERC', r'MAG 1 CENTr', r'SERRANA', r'UNISO IBIRA', r'PONTO CERTO',
+        r'SANTO AMARO', r'SP MAR' # Adicionados Santo Amaro e SP Mar
+    ],
     'TELEFONE': [
         r'MOBILE PAG TIT BANCO 422',
         r'MOBILEPAG TIT BANCO 422',
         r'INT PRE-PAGO',
         r'INT PRE PAGO',
+        # Corrigido chave 'descricao' para minúscula
         {'descricao': r'PAG BOLETO|MOBILEPAG|MOBILE PAG|PAG TIT', 'valor_entre': [-170.00, -30.00]},
         r'VIVO',
         r'CLARO'            
     ],
-    'TRANSFERENCIAS': [r'TED D', r'TBI ', r' TRANSF ', r'PIX '],
+    'TRANSFERENCIAS': [
+        r'TED D', r'TBI ', r' TRANSF ', r'PIX ', r'SALDO DO DIA', r'TED 237', r'TED 999' # Adicionados informativos de entrada de dinheiro
+    ],
     'VIAGEM': [r'FAZENDA GRA', r'FOZ PLAZA', r'PANORAMA', r'NATURAL TRAV', r'CATARA', r'ESPACO DAS A', r'FOZ ', r'URBIA', r'GRANDE HOTEL', r'FEL EMPREEND']
 }
 
