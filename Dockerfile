@@ -9,6 +9,7 @@ RUN pip install --no-cache-dir -r requirements.txt --timeout 600
 
 # Copia o código da aplicação para o diretório de trabalho
 COPY app.py .
+RUN echo "Atualizando arquivos CSV em: $(date)"
 COPY csv/ ./csv/
 
 # Expõe a porta que a aplicação Dash irá usar

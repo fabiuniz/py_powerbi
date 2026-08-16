@@ -18,17 +18,18 @@ categorization_rules = {
     'ESTACIONAMENTO': [r'ESTACION', r'ESTAC ', r'PARK ', r'ESTAPAr', r'SP MARKET E', r'RODOANEL PED', r'ESTAC SHOP'],
     'FARMACIA': [r'GOYA PERFU', r'USEMAISFARM', r'DROGA', r'FARMACIA', r'DROGARIA', r'FARMA', r'MASTER FARMA'],
     'GAS': [r' GAS ', r'INT COMGAS', r'COMGAS', r'ZP GASSI'],
+    'GPS': [r'GPS TILA', r'GPS FA'],
     'GASOLINA': [r'N S FATIMA', r'AURUM', r'PETROL ', r'AUTOSUL', r'AUTO POSTO', r'POTENCIAL TE', r'P STATION', r'AV JOAO DIAS'],
-    'HORTIFRUIT': [r'FRUTAO', r'CHACARA DO', r'HORTIFRUTI', r'HORTIFRU', r'GRAO DA FAM', r'ORVALHO COM', r'ARMAZEMFLOr', r'HORTIFr'], 
+    'HORTIFRUIT': [r'FRUTAO', r'CHACARA DO', r'HORTIFRUTI', r'HORTIFRU', r'GRAO DA FAM', r'ORVALHO COM', r'ARMAZEMFLOr', r'HORTIFr', r'TERRA DOS TE'], 
     'IGREJA': [r'CONADIBE', r'ADS', r'SOCIEDADE B', r'ADSA', r'ADSABRASIL'],
     'IMPRESSORA': [r'PONTODOSCAr', r'PRODATA', r'ATMK COM DE'],
-    'INTERNET': [r'INTERNET', r'NET', r'CLARO'],
+    'INTERNET': [r'INTERNET', r'NET', r'CLARO', 'NETFLIX'],
     'LUZ': [r'ELETROPAULO', r'ENEL'],
     'MECANICO': [r' AUTOPE', r'MERCADOCAr', r'PREMYEr', r'CENTRO AUTO', r'CLIMATOA', r'ESCALADA AU', r'MALURE AUTO', r'AUTOZONE', r'FUJIHEI', r'PALUDETO'], 
     'MERCADO': [
         r'OXXO', r'PAO DE AC', r'MINIMERCADO', r'SUPERM', r'MERCEARIA', r'CHOCOLANDIA', r'EXTRA HIPEr', r'ATACAD[AÃ]O', 
         r'MERCADINHO', r'PANIF', r'PADARIA', r'CARREFOUr', r'BIG BOM', r'MERCADO ', r'MARCO', r'MUFFATO', r'GIGA ATACADO', 
-        r'DG ALIMENTOS', r'ALEMAO HIGI', r'VPMS', r'SUP CERCADAO', r'NOVA BANDEIr', r'SOL E NEVE', r'FRUTAO', r'EMPORIUM ME', r'PRECO JUSTO'
+        r'DG ALIMENTOS', r'ALEMAO HIGI', r'VPMS', r'SUP CERCADAO', r'NOVA BANDEIr', r'SOL E NEVE', r'FRUTAO', r'EMPORIUM ME', r'PRECO JUSTO', r'PONTO DO BOL'
     ],
     'MATERIAL': [r'MARIKA', r'TINTAS', r'ARAUJO MATEr', r'LOJA ELET', r'APOIO TINTAS', r'R PIRES SACO', r'OKINALAr'],
     'OUTROS': [
@@ -36,9 +37,9 @@ categorization_rules = {
         r'ANDREROBERT', r'DORIVALDO', r'DORIVALD', r'JOSE ROGERIO', r'MARCELO MAGE', r'MARCELO MAG', r'COREMAS', r'MARIA JOSE', r'MARIA IMACUL',
         r'PEDRO GUSTAV', r'CAPPTA CORA', r'ETHERIC LIGH', r'DJANIRALEIT', r'VANDERLEI P', r'WILLIAN JOA', r'FRENANDO PA', 
         r'VINICIUSOLIV', r'JOZENIBEZER', r'ORLANDOREIS', r'LEANDROSOUZA', r'PAULODEOLIVE', r'S E SOARES', r'JOSAFAF', r'MARIADE',
-        r'SUELLEN ARMA', r'FUNDACAO Ar', r'PG TON', r'GETULIO', r'MERCADOPAGO', r'62 372', r'46 629'  # Adicionados novos padrões de CNPJ e termos corretos
+        r'SUELLEN ARMA', r'FUNDACAO Ar', r'PG TON', r'GETULIO', r'MERCADOPAGO', r'62 372', r'46 629', r'SPAD'
     ],
-    'PAPELARIA': [r'LAN HOUSE', r'KALUNGA'],
+    'PAPELARIA': [r'LAN HOUSE', r'KALUNGA',r'JulioCesar'],
     'PREFEITURA': [r'PM SAO', r'INT PM SAO PAU', r'INT LICENC SP', r'INT MULTA ', r'IPTU', r'IPVA', r'LICENCIAMENTO', r'BARUERI', r'LICENC', r'MULTA'],        
     'RESTAURANTE': [
         r'FRIENDS', r'BACON', r'CHURRAS', r'BURGEr', r'ESFIHA', r'DOGDODIE', r'JIN JIN', r'MP CALDODE', r'MEI MEI', r'EXPRESS GRI', 
@@ -46,14 +47,14 @@ categorization_rules = {
         r'AQUARELA', r'DOGAO', r'FEIJOADA', r'PASTEL', r'ESPETO', r'BACIO DI', r'VIVENDA DO', r'FRANGO', r'RESTAURA', r'SANTA GULA', 
         r'PIZZARIA', r'HANNOVEr', r'MAGA RESTAUr', r'FATTORIA', r'SAN PIETRO', r'DONA MARIA', r'COMERCIAL VI', r'FRIED CHICKE', 
         r'MP JOILTON', r'SAMPA SUSHI', r'PAG FRIENDS', r'VARANDAS', r'JIM COM', r'SANCREAM', r'PONTO SANTA', r'REAL SUL', r'SALDANHA',
-        r'MP ALE', r'PRA LA DE BO', r'NIPPON', r'ASSB COMERC', r'SPAD' # Adicionado SPAD restaurante
+        r'MP ALE', r'PRA LA DE BO', r'NIPPON', r'ASSB COMERC', r'ANDREGRE'
     ],
     'SAQUE': [r'SAQUE', r'CXE'],
     'SEGURO': [r'PORTO', r'INT TED D', r'BOLETO PORTO S'],
     'SHOPPING': [
         r'RIACHUE', r'DAISO', r'LOJAS AMERI', r'BAHIA', r'CELLSHOP', r'SHOPPING', r'SP MARKET', r'LOJAS RENNE', r'CEA ', r'RENNEr', 
         r'MULTIPLAN', r'OPCAO CENTEr', r'VIVA MORUMBI', r'VIVA MORUMB', r'7015 MORUMB', r'1950 SHOPPIN', r'PORTAL VL DA', r'ANAVITORIAS', r'PARK PLACE',
-        r'DMW COMERCIO', r'JARDIM DAS', r'AUTTAR LOJA', r'GSMMYCOMERC', r'MAG 1 CENTr', r'SERRANA', r'UNISO IBIRA', r'PONTO CERTO',
+        r'DMW COMERCIO', r'JARDIM DAS', r'AUTTAR LOJA', r'GSMMYCOMERC', r'MAG 1 CENTr', r'SERRANA', r'UNISO IBIRA', 
         r'SANTO AMARO', r'SP MAR' # Adicionados Santo Amaro e SP Mar
     ],
     'TELEFONE': [
@@ -69,6 +70,7 @@ categorization_rules = {
     'TRANSFERENCIAS': [
         r'TED D', r'TBI ', r' TRANSF ', r'PIX ', r'SALDO DO DIA', r'TED 237', r'TED 999' # Adicionados informativos de entrada de dinheiro
     ],
+    'TRANSPORTE':[r'BILHETE UNICO', r'PONTO CERTO'],
     'VIAGEM': [r'FAZENDA GRA', r'FOZ PLAZA', r'PANORAMA', r'NATURAL TRAV', r'CATARA', r'ESPACO DAS A', r'FOZ ', r'URBIA', r'GRANDE HOTEL', r'FEL EMPREEND']
 }
 
@@ -83,6 +85,7 @@ descricoes_para_remover = [
 
 # Os arquivos para extrair informações     # pdftotext.exe
 file_paths = [
+        '../../../../Doc/Docs/Extratos/extrato_072026_260805_105432.txt',  # 07/26 a 08/26
         '../../../../Doc/Docs/Extratos/extrato_052026_260716_102322.txt',  # 06/26 a 07/26
         '../../../../Doc/Docs/Extratos/extrato_042026_260602_181120.txt',  # 04/26 a 06/26
         '../../../../Doc/Docs/Extratos/extrato_032026_260505_124517.txt',  # 03/26 a 05/26
@@ -98,7 +101,7 @@ file_paths = [
         '../../../../Doc/Docs/Extratos/extrato_072024_250326_201254.txt',  # 06/04 a 03/25
         '../../../../Doc/Docs/Extratos/extrato_012025_250530_222908.txt',  # 01/25 a 05/25
         '../../../../Doc/Docs/Extratos/extrato_012025_250811_181326.txt',  # 12/24 a 08/25
-        '../../../../Doc/Docs/Extratos/extrato_xxxxx.txt',                 # 12/24 a 05/25
+        '../../../../Doc/Docs/Extratos/extrato_manual.txt',                 # 12/24 a 05/25
         '../../../../Doc/Docs/Extratos/extrato_112023.txt',                # 11/23 a 02/24 
         '../../../../Doc/Docs/Extratos/extrato_0112023_banco_extrato.txt', # 11/23 a 02/24        
         #'../../../../Doc/Docs/Extratos/extrato_2012_ContaCorrente2.txt'    # 10/12    

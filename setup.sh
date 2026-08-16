@@ -1,3 +1,5 @@
+#!/bin/bash
+#
 #docker build -t dashboard-app .
 #docker run -p 8050:8050 dashboard-app
 #ufw allow 8050/tcp
@@ -9,7 +11,6 @@
 
 
 
-#!/bin/bash
 
 # =================================================================
 # SCRIPT DE SETUP - DASHBOARD APP

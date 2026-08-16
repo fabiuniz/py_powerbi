@@ -1,7 +1,9 @@
-cd tratamento 
+#!/bin/bash
+
+cd tratamento
 echo "🚀Iniciando processamento Python ---"
 # Roda o python usando o caminho absoluto para evitar erros de diretório
-python "trata_dados_b.py"
+python "trata_dados.py"
 
 
 echo "🔄Atualizando arquivo de despesas oficial ---"

@@ -1,11 +1,13 @@
+import os
 import pandas as pd
 import re
-from rules import categorization_rules, descricoes_para_remover, file_paths
-import sys
+import hashlib
 import io
-
-if sys.stdout.encoding != 'utf-8':
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+import json
+import sys
+from rules import categorization_rules,descricoes_para_remover,file_paths
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
 def preprocess_raw_statement(file_path):
     """
@@ -35,7 +37,7 @@ def parse_statement_lines(lines):
     # Expressão regular para capturar Data, Descrição e Valor
     # A descrição é um grupo não-guloso (.*?) para evitar capturar a data ou o valor
     # O valor pode ser negativo e ter vírgula
-    pattern = re.compile(r'(\d{2}/\d{2}/\d{4})\s+(.*?)\s+(-?[\d.]*,\d{2})')
+    pattern = re.compile(r'(\d{2}/\d{2}/\d{4})\s+(.*?)\s+(-?\d+,\d{2})')
     
     for line in lines:
         match = pattern.search(line)
@@ -57,22 +59,7 @@ def categorize_transactions(df, categorization_rules):
     """
     df['Categoria'] = 'Nao_Categorizado'
     # Converte o valor para float, substituindo a vírgula por ponto
-    # Primeiro remove o ponto de milhar, depois troca a vírgula por ponto decimal
-    df['Valor_num'] = (
-        df['Valor']
-        .str.replace('.', '', regex=False)
-        .str.replace(',', '.', regex=False)
-        .astype(float)
-    )
-    # Isso remove depósitos, transferências recebidas e saldos positivos
-    # 1. Filtra para manter apenas o que é saída
-    df = df[df['Valor_num'] < 0].copy()
-
-    # 2. CONVERTE PARA POSITIVO PARA FACILITAR A SOMA NOS RELATÓRIOS
-    df['Valor_num'] = -df['Valor_num'].abs()
-    
-    # Se você quiser que a coluna 'Valor' (texto com vírgula) também fique positiva:
-    df['Valor'] = df['Valor'].apply(lambda x: x if x.startswith('-') else '-' + x)
+    df['Valor_num'] = df['Valor'].str.replace(',', '.').astype(float)
     
     # Cria uma cópia para evitar o SettingWithCopyWarning
     df_categorized = df.copy()
@@ -80,6 +67,13 @@ def categorize_transactions(df, categorization_rules):
     for category, rules in categorization_rules.items():
         for rule in rules:
             
+            # --- RESET DAS VARIÁVEIS PARA CADA REGRA ---
+            descricao_pattern = None
+            valor_exato = None
+            valor_maior_que = None
+            valor_menor_que = None
+            valor_entre = None
+
             # --- Inicia a máscara de categorização ---
             combined_mask = pd.Series([True] * len(df_categorized))
 
@@ -112,14 +106,15 @@ def categorize_transactions(df, categorization_rules):
                     valor_mask = (df_categorized['Valor_num'] >= valor_min) & (df_categorized['Valor_num'] <= valor_max)
                     combined_mask = combined_mask & valor_mask
             
-            # Se houver um padrão de descrição, aplica a máscara.
+            # Se houver um padrão de descrição válido para esta regra, aplica a máscara.
             if descricao_pattern:
                 descricao_mask = df_categorized['Descricao'].str.contains(descricao_pattern, case=False, na=False)
                 combined_mask = combined_mask & descricao_mask
+            else:
+                # Se não houver padrão de descrição definido para a regra, ela não deve validar nada por texto
+                combined_mask = pd.Series([False] * len(df_categorized))
 
             # Aplica a categoria APENAS se a categoria atual for 'Nao_Categorizado'.
-            # Isso impede a sobrescrita.
-            # O `loc` agora é usado em `df_categorized`
             mask_to_apply = combined_mask & (df_categorized['Categoria'] == 'Nao_Categorizado')
             df_categorized.loc[mask_to_apply, 'Categoria'] = category
             
@@ -133,14 +128,14 @@ def clean_and_sort_dataframe(df):
     """
     Remove linhas duplicadas e ordena o DataFrame por data.
     """
-    # Remove duplicatas e cria uma cópia explícita para evitar o SettingWithCopyWarning
+    # Create a new DataFrame using a deep copy
     df_cleaned = df.drop_duplicates(subset=['Data', 'Descricao'], keep='first').copy()
     
-    # Converte a coluna 'Data' para o tipo datetime.
-    df_cleaned['Data'] = pd.to_datetime(df_cleaned['Data'], format='%d/%m/%Y')
+    # Use .loc to safely modify the DataFrame
+    df_cleaned.loc[:, 'Data'] = pd.to_datetime(df_cleaned['Data'], format='%d/%m/%Y')
     
     # Ordena o DataFrame pela coluna 'Data' em ordem crescente.
-    df_sorted = df_cleaned.sort_values(by='Data')
+    df_sorted = df_cleaned.sort_values(by='Data', ascending=False)
     
     return df_sorted
 
@@ -151,25 +146,74 @@ def process_full_statement(file_path, categorization_rules):
     2. Extrai os campos.
     3. Retorna um DataFrame com os dados brutos e um DataFrame categorizado.
     """
-    print(f"--- 1. Lendo e limpando o arquivo bruto: {file_path}")
+    print(f"--- 📖 Lendo e limpando o arquivo bruto: {file_path}")
     lines = preprocess_raw_statement(file_path)
     if not lines:
         return None, None
 
-    print("--- 2. Extraindo campos (Data, Descrição, Valor)...")
+    print("--- 🔍 Extraindo campos (Data, Descrição, Valor)...")
     df_raw = parse_statement_lines(lines)
     if df_raw.empty:
-        print(f"Nenhuma linha válida encontrada no arquivo {file_path}. O processo foi encerrado.")
+        print(f"⚠️Nenhuma linha válida encontrada no arquivo {file_path}. O processo foi encerrado.")
         return None, None
 
     return df_raw, None # Retorna o DataFrame bruto e None para o categorizado, pois a categorização será feita no final.
 
+def add_txt(df, file_path):
+    """
+    Salva as transações de um DataFrame em um arquivo de texto.
+
+    Args:
+        df (pd.DataFrame): O DataFrame a ser salvo.
+        file_path (str): O caminho e nome do arquivo de saída.
+    """
+    with open(file_path, 'w', encoding='utf-8') as f:
+        f.write("--- Transações não categorizadas ---\n")
+        f.write("-" * 50 + "\n")
+        
+        for index, row in df.iterrows():
+            linha = f"Data: {row['Data']:<10} | Descrição: {row['Descricao']:<40} | Valor: {row['Valor']}\n"
+            f.write(linha)
+            
+        f.write("-" * 50 + "\n")
+
+import hashlib
+
+def descaracterizar_misto(descricao: str) -> str:
+    if not descricao:
+        return "***"    
+    palavras = descricao.split()
+    primeira_palavra = palavras[0] if palavras else ""    
+    # Gera o hash do texto completo para garantir a unicidade
+    hash_unico = hashlib.sha256(descricao.encode('utf-8')).hexdigest()[:8]    
+    # Retorna a primeira palavra + o hash identificador
+    return f"{primeira_palavra} #{hash_unico}"
+
+def print_nao_categorizadas(nao_categorizadas):
+    if not nao_categorizadas.empty:
+        # 2. Remove duplicatas apenas para exibição no terminal (evita poluição visual)
+        nao_categorizadas_unicas = nao_categorizadas.drop_duplicates(subset=['Descricao'])
+        print(f"\n⚠️  ALERTA: Foram encontradas {len(nao_categorizadas_unicas)} descrições únicas sem categoria!")
+        print("-" * 80)
+        print(f"{'DATA':<12} | {'DESCRIÇÃO':<45} | {'VALOR (R$)':<10}")
+        print("-" * 80)        
+        # 3. Varre e imprime cada uma delas formatada
+        for index, row in nao_categorizadas_unicas.iterrows():
+            print(f"{row['Data']:<12} | {row['Descricao']:<45} | {row['Valor']:<10}")        
+        print("-" * 80)
+        print("💡 Dica: Adicione estes termos acima ao seu arquivo 'rules.py' para categorizá-los.\n")
+    else:
+        print("--- 🎉 Excelente! Todas as transações foram categorizadas com sucesso!\n")
+
 # --- Bloco principal de execução ---
 if __name__ == '__main__':
 
+    # call rules.py here
+    
     all_dataframes = []
     
     # Itera sobre a lista de arquivos e processa cada um, acumulando os DataFrames.
+    print("\n📖1. Extraindo todas as transações...")
     for path in file_paths:
         df_raw, _ = process_full_statement(path, categorization_rules)
         if df_raw is not None and not df_raw.empty:
@@ -177,151 +221,195 @@ if __name__ == '__main__':
     
     # Se houver DataFrames para concatenar, continua o processamento.
     if all_dataframes:
-        # Concatena todos os DataFrames em um único DataFrame grande.
-        print("\n--- 3. Unindo todos os arquivos processados em um único DataFrame...")
+        print("\n🔗2. Unindo todos os arquivos processados em um único DataFrame...")
         df_combined = pd.concat(all_dataframes, ignore_index=True)
-        
-        print("--- 4. Categorizando todas as transações...")
-        df_categorized, uncategorized_list = categorize_transactions(df_combined.copy(), categorization_rules)
+        print(f"---📊 Total de registros unificados: {len(df_combined)} linhas.\n")
 
-        if uncategorized_list:
-            print("\n--- ATENÇÃO: Descrições não categorizadas encontradas! ---")
-            print("As seguintes descrições serão salvas com a categoria 'Nao_Categorizado':")
-            for desc in uncategorized_list:
-                print(f"- {desc}")
-            print("-" * 50)
-        else:
-            print("\n--- Todas as descrições foram categorizadas com sucesso! ---")
+        # --- MÉTRICAS DE AUDITORIA INICIAL ---
+        # Converte temporariamente para float para somar o valor bruto total extraído
+        df_combined['Valor_num_temp'] = df_combined['Valor'].str.replace(',', '.').astype(float)
+        total_linhas_bruto = len(df_combined)
+        valor_total_bruto = df_combined['Valor_num_temp'].sum()
+
+        print("🏷️3. Categorizando todas as transações...")
+        df_categorized, _ = categorize_transactions(df_combined.copy(), categorization_rules)
+        nao_categorizadas = df_categorized[df_categorized['Categoria'] == 'Nao_Categorizado'].copy()
+        print_nao_categorizadas(nao_categorizadas)
+
+        # --- Removendo descrições indesejadas do DataFrame completo ---
+        print("🧹3.1. Removendo descrições indesejadas...")
+        padrao_regex = '|'.join(descricoes_para_remover)
+        mascara_remocao = df_categorized['Descricao'].str.contains(padrao_regex, case=False, na=False)
+        df_filtrado_final = df_categorized[~mascara_remocao].copy()
+
+        # --- Removendo duplicados
+        df_combined.drop_duplicates(inplace=True)
+        # Converte 'Data' para datetime, ordena e formata de volta para string
+        df_combined['Data'] = pd.to_datetime(df_combined['Data'], format='%d/%m/%Y', errors='coerce')
+        df_combined = df_combined.sort_values(by='Data', ascending=False)
+        df_combined['Data'] = df_combined['Data'].dt.strftime('%d/%m/%Y')
         
-        # O DataFrame 'df_categorized' já contém todas as transações,
-        # incluindo as que foram marcadas como 'Nao_Categorizado'.
-        final_df = df_categorized.copy()
+        # Salva o DataFrame já ordenado no arquivo de log
+        # Se você removeu descrições indesejadas (como SALDO ANTERIOR), guarde o impacto:
+        valor_removido_filtros = df_categorized[mascara_remocao]['Valor_num'].sum()
+        linhas_removidas_filtros = mascara_remocao.sum()
+        add_txt(df_combined, "../logs/rep_combined_trated.log")
+
+        # Filtra o DataFrame para encontrar as transações não categorizadas
+        uncategorized_df = df_filtrado_final[df_filtrado_final['Categoria'] == 'Nao_Categorizado'].copy()
+
+        if not uncategorized_df.empty:
+            # 1. Converte a coluna 'Data' para datetime
+            uncategorized_df['Data'] = pd.to_datetime(uncategorized_df['Data'], format='%d/%m/%Y')
+            
+            # 2. Ordena o DataFrame pela data em ordem decrescente
+            uncategorized_df = uncategorized_df.sort_values(by='Data', ascending=False)
+            
+            # 3. Formata a coluna 'Data' de volta para string antes de salvar
+            uncategorized_df['Data'] = uncategorized_df['Data'].dt.strftime('%d/%m/%Y')
+            
+            output_txt_path = '..\logs\descricoes_nao_categorizadas.log'
+            # Chama a função para salvar as transações não categorizadas
+            add_txt(uncategorized_df, output_txt_path)
+
+            print("\n--- ⚠️ATENÇÃO: Descrições não categorizadas encontradas! ---")
+            print("As seguintes transações serão salvas com a categoria 'Nao_Categorizado':")
+            
+            # Exibe as 3 colunas (Data, Descricao, Valor)
+            print("-" * 50)
+            for index, row in uncategorized_df.iterrows():        
+                #desc = descaracterizar_misto(row['Descricao']);        
+                desc = row['Descricao'];
+                print(f"Data: {row['Data']:<10} | Descrição: {desc:<40} | Valor: {row['Valor']}")
+            print("-" * 50)
+            
+        else:
+            print("--- ✨Todas as descrições foram categorizadas com sucesso! ---\n")
+        
+        final_df = df_filtrado_final.copy() # Good practice to work on a copy
 
         # --- Passo 5: Chamada da função de limpeza e ordenação ---
-        print("--- 5. Removendo duplicatas e ordenando o DataFrame...")
-        final_df = clean_and_sort_dataframe(final_df)
+        print("⚡4. Removendo duplicatas e ordenando o DataFrame...")
+        linhas_antes = len(final_df)
         
+        # ✅ Garante a remoção de duplicatas usando a Descrição ENQUANTO ela existe
+        final_df.drop_duplicates(subset=['Data', 'Descricao', 'Valor'], inplace=True)
         
-        # --- NOVO BLOCO: JSON EXPORT ---
-        print("--- 5a. Formatando e exportando JSON...")
-        # Cria uma cópia do DataFrame ANTES de remover colunas e reformatar para CSV.
-        df_json_export = final_df.copy()
+        # Executa a ordenação por data
+        final_df['Data'] = pd.to_datetime(final_df['Data'], format='%d/%m/%Y', errors='coerce')
+        final_df = final_df.sort_values(by='Data', ascending=False)
         
-        # 1. Adiciona as colunas extras e formata/renomeia conforme o JSON desejado
-        df_json_export['id'] = df_json_export.reset_index().index + 1
-        df_json_export['timestamp'] = (df_json_export['Data'].astype('int64') // 10**6) 
-        df_json_export['date'] = df_json_export['Data'].dt.strftime('%Y-%m-%d')
-        df_json_export['payment_method'] = 'Não Informado' # Valor fixo
-        df_json_export['notes'] = '' # Valor fixo
+        removidos = linhas_antes - len(final_df)
+        print(f"--- 🗑️ Linhas duplicadas removidas: {removidos}")
 
-        # 2. Renomeia e seleciona colunas
-        df_json_export.rename(columns={
-            'Descricao': 'description',
-            'Valor_num': 'value', # Usa a coluna numérica
-            'Categoria': 'category'
-        }, inplace=True)
-        
-        # Seleciona e reordena as colunas do JSON no formato desejado
-        df_json_export = df_json_export[['id', 'timestamp', 'description', 'value', 'payment_method', 'date', 'notes', 'category']]
-        
-        # 3. Agrupa por 'category' e transforma em um dicionário de listas para o JSON
-        # O to_json(orient='records') converte cada sub-dataframe em uma lista de objetos
-        json_grouped = df_json_export.groupby('category').apply(lambda x: x.to_dict('records')).to_dict()
-        
-        # Exportação JSON
-        output_json_path = '../csv/despesas_processadas.json' 
-        with open(output_json_path, 'w', encoding='utf-8') as f:
-            # Escreve o dicionário no arquivo, usando indentação para legibilidade
-            import json
-            json.dump(json_grouped, f, indent=4, ensure_ascii=False)
-            
-        print(f"Cópia do arquivo salva em: {output_json_path}")
-        # --- FIM DO BLOCO JSON EXPORT ---
-        
-        
-        # Continua a rotina de CSV original:
-        
-        # Remove as colunas desnecessárias para o CSV final (mantendo o Valor original com vírgula)
-        final_df = final_df.drop(columns=['Descricao', 'Valor_num']) 
-        
-        # Renomeia as colunas para o padrão final
-        final_df.rename(columns={'Data': 'Data', 'Categoria': 'Categoria', 'Valor': 'Valor'}, inplace=True)
-        
-        # A coluna 'Data' já é do tipo datetime, então podemos formatá-la
+        # Formata a data de volta para string
         final_df['Data'] = final_df['Data'].dt.strftime('%d/%m/%Y')
+        # Retira negativos
+        final_df['Valor'] = final_df['Valor'].astype(str).str.replace(',', '.').astype(float).abs().apply(lambda x: f"{x:.2f}".replace('.', ','))
+        
+        # 2. Se existirem colunas numéricas de suporte, limpa elas também para não exportar negativos
+        for col in ['Valor_num', 'Valor_num_temp']:
+            if col in final_df.columns:
+                final_df[col] = final_df[col].abs()
+        # ---------------------------------------------------
 
-        # Reordena as colunas para o padrão final: Data, Categoria, Valor
-        final_df = final_df[['Data', 'Categoria', 'Valor']]
+        # ✅ AGORA criamos a versão final apenas com o necessário para o CSV
+        final_df_para_csv = final_df[['Data', 'Categoria', 'Valor']].copy()
 
         # Define o caminho e o nome do arquivo de saída
         output_csv_path = '../csv/despesas_processadas.csv'
         
         # Salva o DataFrame em um arquivo CSV
-        final_df.to_csv(output_csv_path, sep=';', index=False)
+        final_df_para_csv.to_csv(output_csv_path, sep=';', index=False)
         
-        print(f"\nDados processados e salvos em: {output_csv_path}")
-        print("\nPrimeiras 5 linhas do arquivo CSV gerado:")
-        print(final_df.head())
-        print("\nPrimeira linha do arquivo JSON gerado (Amostra):")
+        print(f"\n💾5. Dados processados e salvos em: {output_csv_path}")
+        print("\n--- Primeiras 5 linhas do arquivo gerado:")
+        preview_linhas = final_df_para_csv.head().to_string()
+        preview_com_recuo = "\n".join("        " + linha for linha in preview_linhas.split("\n"))        
+        print(preview_com_recuo)
         
-        # Imprime uma amostra do JSON agrupado
-        import json
-        sample_output = {k: v[:1] for k, v in json_grouped.items()} # Pega o primeiro item de cada categoria
-        print(json.dumps(sample_output, indent=4, ensure_ascii=False))
+        # --- MÉTRICAS DE AUDITORIA FINAL ---
+        final_df['Valor_num_temp'] = final_df['Valor'].str.replace(',', '.').astype(float)
+        total_linhas_final = len(final_df)
+        valor_total_final = final_df['Valor_num_temp'].sum()
+        
+        # Cálculo das diferenças (o que foi considerado duplicata)
+        linhas_duplicadas = total_linhas_bruto - total_linhas_final - linhas_removidas_filtros
+        valor_duplicadas = valor_total_bruto - valor_total_final - valor_removido_filtros
+        
+        # --- EXPORTAÇÃO PARA O FORMATO JS DO APP (data_despesas.js) ---
+        print("\n📦6. Gerando arquivo data_despesas.js...")
+        # Prepara o dicionário agrupado por categoria
+        app_model_dict = {}
+        # Itera sobre cada linha do dataframe final processado
+        for idx, row in final_df.iterrows():
+            categoria = row['Categoria']
+            if categoria not in app_model_dict:
+                app_model_dict[categoria] = []
+            # Converte o valor para float, tratando possíveis vírgulas
+            val_num = float(str(row['Valor']).replace(',', '.'))
+            # Cria o objeto da transação no formato esperado pelo app
+            transacao = {
+                "id": int(row.get('id', idx + 1)),
+                "timestamp": int(pd.to_datetime(row['Data'], format='%d/%m/%Y').timestamp() * 1000),
+                "description": str(row['Descricao']),
+                "value": val_num,
+                "date": pd.to_datetime(row['Data'], format='%d/%m/%Y').strftime('%Y-%m-%d'),
+                "category": categoria
+            }
+            app_model_dict[categoria].append(transacao)
+        # Monta a string no formato exigido pelo seu app
+        js_content = f"window.APP_MODEL = {json.dumps(app_model_dict, ensure_ascii=False, indent=4)};\n"
+        js_content += "console.log('✅ Modelo de dados carregado.');\n"
+        # Caminho onde o arquivo será salvo (ajuste conforme sua pasta assets)
+        output_js_path = '../assets/data_despesas.js'
+        with open(output_js_path, 'w', encoding='utf-8') as f_js:
+            f_js.write(js_content)
+        print(f"✨ Arquivo gerado com sucesso em: {output_js_path}")
+        print("\n📊 6.1. Gerando arquivo adicional data_despesas.csv...")
+        pasta_csv = '../csv'
+        if not os.path.exists(pasta_csv):
+            os.makedirs(pasta_csv)
+        output_data_csv_path = os.path.join(pasta_csv, 'data_despesas.csv')
+        # 1. Cria cópia e formata data para AAAA-MM-DD
+        df_para_csv = final_df.copy()
+        df_para_csv['Data'] = pd.to_datetime(df_para_csv['Data'], format='%d/%m/%Y').dt.strftime('%Y-%m-%d')
+        # 2. Aplica o OFUSCAMENTO na descrição
+        df_para_csv['Descricao'] = df_para_csv['Descricao'].apply(descaracterizar_misto)
+        # 3. Renomeia para o formato esperado
+        df_para_csv = df_para_csv.rename(columns={
+            'Data': 'date', 
+            'Descricao': 'description', 
+            'Valor': 'value', 
+            'Categoria': 'category'
+        })
+        # 4. Garante que id e timestamp existam
+        if 'id' not in df_para_csv.columns:
+            df_para_csv['id'] = range(1, len(df_para_csv) + 1)
+        if 'timestamp' not in df_para_csv.columns:
+            df_para_csv['timestamp'] = pd.to_datetime(df_para_csv['date']).apply(lambda x: int(x.timestamp() * 1000))
+        # 5. Força a ordem exata das colunas: id;timestamp;description;value;date;category
+        df_para_csv = df_para_csv[['id', 'timestamp', 'description', 'value', 'date', 'category']]
+        # 6. Salva o CSV
+        df_para_csv.to_csv(output_data_csv_path, sep=';', index=False, encoding='utf-8-sig')
+        print(f"✨ Arquivo CSV gerado com sucesso em: {output_data_csv_path}")
+
+        # --- PAINEL DE AUDITORIA ---
+        print("\n==================================================")
+        print("📋7. RELATÓRIO DE RECONCILIAÇÃO (AUDITORIA DE DADOS)")
+        print("==================================================")
+        print(f"📥 Total extraído dos arquivos: {total_linhas_bruto} linhas | R$ {valor_total_bruto:.2f}")
+        print(f"🧹 Removidos por filtro (Saldos etc.): {linhas_removidas_filtros} linhas | R$ {valor_removido_filtros:.2f}")
+        print(f"👥 Duplicatas eliminadas: {linhas_duplicadas} linhas | R$ {valor_duplicadas:.2f}")
+        print(f"💾 Gravados no CSV Final: {total_linhas_final} lines | R$ {valor_total_final:.2f}")
+        print("--------------------------------------------------")
+
+        # A prova dos nove:
+        diferenca = (valor_total_bruto - (valor_total_final + valor_removido_filtros + valor_duplicadas))
+        if abs(diferenca) < 0.01:
+            print("✅ RECONCILIAÇÃO PERFEITA: A matemática bateu 100%!")
+        else:
+            print(f"❌ ALERTA: Há uma quebra de integridade de R$ {diferenca:.2f} não explicada!")
+        print("==================================================")
     else:
-        print("\nNenhum dado válido para processar.")
-
-# --- Bloco principal de execução ---
-if __name__ == '__main__':
-
-    all_dataframes = []
-    
-    for path in file_paths:
-        df_raw, _ = process_full_statement(path, categorization_rules)
-        if df_raw is not None and not df_raw.empty:
-            all_dataframes.append(df_raw)
-    
-    if all_dataframes:
-        # ... (seu código de união e categorização anterior) ...
-        df_combined = pd.concat(all_dataframes, ignore_index=True)
-        df_categorized, uncategorized_list = categorize_transactions(df_combined.copy(), categorization_rules)
-
-        # 1. Garante que a data seja reconhecida para extrair o ano
-        df_categorized['Data'] = pd.to_datetime(df_categorized['Data'], format='%d/%m/%Y')
-        df_categorized['Ano'] = df_categorized['Data'].dt.year
-
-        # 1. Primeiro limpamos os dados (Duplicatas e Datas)
-        final_df = clean_and_sort_dataframe(df_categorized)
-        
-        # 2. Garantimos que o Ano seja extraído corretamente
-        final_df['Ano'] = final_df['Data'].dt.year
-        
-        # 3. Calculamos o resumo ANTES de imprimir o total
-        resumo_anual = final_df.groupby('Ano')['Valor_num'].sum()
-        total_real = resumo_anual.sum() # Soma apenas o que está nos anos acima
-
-        print("\n" + "="*40)
-        print("CONCILIAÇÃO FINANCEIRA FINAL")
-        print("="*40)
-
-        for ano, soma in resumo_anual.items():
-            # Formatação para o padrão brasileiro R$ 0.000,00
-            soma_formatada = f"R$ {soma:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-            print(f"ANO {ano}: {soma_formatada}")
-        
-        print("-" * 40)
-        total_formatado = f"R$ {total_real:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-        print(f"SOMA TOTAL REAL: {total_formatado}")
-        print("="*40 + "\n")
-
-        # Segue para a exportação...
-        final_df = clean_and_sort_dataframe(df_categorized)
-        # ...
-        
-        # Exportação JSON e CSV seguem aqui como no seu código...
-        # ... (seu código de exportação JSON) ...
-        # ... (seu código de exportação CSV) ...
-
-        print(f"\n✅ Processamento concluído com sucesso!")
-    else:
-        print("\n❌ Nenhum dado válido para processar.")
+        print("\n⚠️Nenhum dado válido para processar.")

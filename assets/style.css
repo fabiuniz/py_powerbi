@@ -17,6 +17,7 @@
         display: none !important;
     }
 }
+
 @media print {
     /* Força orientação Paisagem (Landscape) */
     @page {
@@ -58,14 +59,22 @@
         visibility: hidden !important;
     }
 
-    /* Otimiza as fontes das tabelas para o papel */
+    /* Otimiza as fontes das tabelas para o papel - VALORES AUMENTADOS */
     .dash-spreadsheet-container, table {
         width: 100% !important;
     }
     
-    .dash-spreadsheet th, 
+    /* Configuração das células de dados (Valores e textos da tabela) */
     .dash-spreadsheet td {
-        font-size: 8pt !important;
-        padding: 4px !important;
+        font-size: 10.5pt !important; /* Aumentado de 8pt para 10.5pt */
+        padding: 6px 4px !important;  /* Leve ajuste de espaçamento interno para legibilidade */
+        font-weight: 500 !important;   /* Deixa os números ligeiramente mais encorpados/visíveis */
+    }
+
+    /* Configuração dos cabeçalhos da tabela */
+    .dash-spreadsheet th {
+        font-size: 11pt !important;   /* Cabeçalho ligeiramente maior para destaque */
+        padding: 6px 4px !important;
+        font-weight: bold !important;
     }
 }
