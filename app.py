@@ -863,10 +863,12 @@ def get_relatorio_despesas_por_mes():
         # 3. Converte para número e trata sinais
         df_despesas_pessoais['Valor'] = pd.to_numeric(df_despesas_pessoais['Valor'], errors='coerce')
         # Filtra para manter apenas o que é menor que zero (Saídas)
-        df_despesas_pessoais = df_despesas_pessoais[df_despesas_pessoais['Valor'] < 0].copy()
         df_despesas_pessoais['Valor'] = df_despesas_pessoais['Valor'].abs()
         # 4. Remove nulos (agora as linhas de milhar não serão removidas!)
-        df_despesas_pessoais.dropna(subset=['Data', 'Categoria', 'Valor'], inplace=True)
+        # Preenche dados faltantes em vez de apagar a linha
+        df_despesas_pessoais['Categoria'] = df_despesas_pessoais['Categoria'].fillna('Outros')
+        df_despesas_pessoais['Valor'] = df_despesas_pessoais['Valor'].fillna(0)
+        df_despesas_pessoais = df_despesas_pessoais.dropna(subset=['Data'])
     except FileNotFoundError:
         return html.Div("Erro: Arquivo csv/despesa.csv não encontrado.")
     except Exception as e:
@@ -1172,24 +1174,32 @@ def mostrar_detalhes_itens(active_cell, virtual_data):
     mes_num = mapa_meses[col_id]
 
     try:
-        # Carregamos o CSV original para buscar as linhas que compõem o total
+        # Carregamos o CSV original
         df_raw = pd.read_csv('csv/despesas.csv', sep=';', encoding='utf-8')
         df_raw['Data'] = pd.to_datetime(df_raw['Data'], format='%d/%m/%Y', errors='coerce')
         
-        # Limpeza rápida para o filtro bater
-        df_raw['Valor_Num'] = df_raw['Valor'].astype(str).str.replace('.', '', regex=False).str.replace(',', '.', regex=False)
+        # Limpeza correta do valor (removendo ponto de milhar e trocando vírgula)
+        df_raw['Valor_Num'] = (
+            df_raw['Valor'].astype(str)
+            .str.replace('.', '', regex=False)
+            .str.replace(',', '.', regex=False)
+        )
         df_raw['Valor_Num'] = pd.to_numeric(df_raw['Valor_Num'], errors='coerce')
         
-        # Filtro mestre
+        # Filtra o dataframe para o mês, ano e categoria corretos
         df_detalhe = df_raw[
             (df_raw['Categoria'] == categoria_clicada) & 
             (df_raw['Data'].dt.month == mes_num) & 
-            (df_raw['Data'].dt.year == ano_clicado) &
-            (df_raw['Valor_Num'] < 0)
+            (df_raw['Data'].dt.year == ano_clicado)
         ].copy()
         
+        # ⚠️ CORRIGIDO: Usa df_detalhe para pegar o valor absoluto correto
         df_detalhe['Valor'] = df_detalhe['Valor_Num'].abs()
 
+        # Formata a data para ficar bonita na tabela de detalhes
+        df_detalhe['Data'] = df_detalhe['Data'].dt.strftime('%d/%m/%Y')
+
+        # ⚠️ ADICIONADO: Retorna o HTML com a tabela renderizada
         return html.Div([
             html.H3(f"📋 Detalhamento: {categoria_clicada} ({col_id}/{ano_clicado})", 
                     className="text-lg font-bold mb-3 text-blue-800"),
@@ -1204,7 +1214,6 @@ def mostrar_detalhes_itens(active_cell, virtual_data):
         ])
     except Exception as e:
         return html.P(f"Erro ao carregar detalhes: {str(e)}", className="text-danger")
-    
 clientside_callback(
     """
     function(n_clicks) {
